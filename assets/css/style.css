@@ -251,7 +251,13 @@ p { margin: 0 0 1em; }
   border: 1px solid #e4ddce;
 }
 .card .img-placeholder { min-height: 200px; }
-.card img { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; display: block; }
+.card img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: contain;
+  display: block;
+  background: #f1ede4;
+}
 .card-body { padding: 20px; }
 .card-body h3 { font-size: 1.05rem; margin-bottom: 6px; }
 .card-body p { color: var(--color-stone); font-size: 0.9rem; margin-bottom: 0; }
