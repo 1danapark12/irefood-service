@@ -12,7 +12,7 @@
   --font-sans: "Noto Sans KR", "Pretendard", -apple-system, sans-serif;
 
   --container-width: 1160px;
-  --header-height: 88px;
+  --header-height: 108px;
   --transition: 0.25s ease;
 }
 
@@ -100,9 +100,9 @@ p { margin: 0 0 1em; }
   display: flex;
   align-items: center;
 }
-.logo-img { height: 44px; width: auto; display: block; }
+.logo-img { height: 68px; width: auto; display: block; }
 @media (max-width: 560px) {
-  .logo-img { height: 34px; }
+  .logo-img { height: 46px; }
 }
 
 .gnb { display: flex; gap: 40px; }
@@ -348,6 +348,10 @@ p { margin: 0 0 1em; }
   font-size: 0.85rem;
   cursor: pointer;
   color: var(--color-charcoal);
+}
+.filter-bar button[data-category="마라탕·훠궈 재료"] {
+  border-color: var(--color-gold);
+  font-weight: 600;
 }
 .filter-bar button.active {
   border-color: var(--color-gold);

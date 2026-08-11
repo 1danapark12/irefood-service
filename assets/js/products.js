@@ -10,7 +10,7 @@
 
   function metaLine(p) {
     const parts = [p.storage, p.origin].filter((v) => v && v !== "-");
-    return parts.length ? parts.join(" · ") : p.category;
+    return parts.length ? parts.join(" · ") : p.categories.join(" · ");
   }
 
   function cardHTML(p) {
@@ -33,9 +33,17 @@
   function renderPreview(products, wrap) {
     const seen = new Set();
     const picks = [];
+    // 마라탕·훠궈 재료(주력 매출 카테고리)를 먼저 노출
+    const featured = products.find((p) => p.categories.includes("마라탕·훠궈 재료"));
+    if (featured) {
+      picks.push(featured);
+      featured.categories.forEach((c) => seen.add(c));
+    }
     for (const p of products) {
-      if (seen.has(p.category)) continue;
-      seen.add(p.category);
+      if (picks.includes(p)) continue;
+      const newCats = p.categories.filter((c) => !seen.has(c));
+      if (newCats.length === 0) continue;
+      newCats.forEach((c) => seen.add(c));
       picks.push(p);
       if (picks.length === 6) break;
     }
@@ -49,16 +57,19 @@
   }
 
   function renderFilterBar(products, bar, grid, searchInput) {
-    const categories = ["전체", ...new Set(products.map((p) => p.category))];
+    const rest = [...new Set(products.flatMap((p) => p.categories))].filter(
+      (c) => c !== "마라탕·훠궈 재료"
+    );
+    const categories = ["전체", "마라탕·훠궈 재료", ...rest];
     bar.innerHTML = categories
-      .map((c, i) => `<button type="button" class="${i === 0 ? "active" : ""}" data-category="${c}">${c} (${c === "전체" ? products.length : products.filter((p) => p.category === c).length})</button>`)
+      .map((c, i) => `<button type="button" class="${i === 0 ? "active" : ""}" data-category="${c}">${c} (${c === "전체" ? products.length : products.filter((p) => p.categories.includes(c)).length})</button>`)
       .join("");
 
     function applyFilter() {
       const activeBtn = bar.querySelector("button.active");
       const cat = activeBtn ? activeBtn.dataset.category : "전체";
       const q = (searchInput ? searchInput.value : "").trim();
-      let filtered = cat === "전체" ? products : products.filter((p) => p.category === cat);
+      let filtered = cat === "전체" ? products : products.filter((p) => p.categories.includes(cat));
       if (q) filtered = filtered.filter((p) => p.name.includes(q));
       renderGrid(filtered, grid);
     }
@@ -94,7 +105,7 @@
       <h1 style="margin-top:24px;">${product.name}</h1>
       <div class="info-row"><strong>보관방법</strong><span>${product.storage}</span></div>
       <div class="info-row"><strong>원산지</strong><span>${product.origin}</span></div>
-      <div class="info-row"><strong>카테고리</strong><span>${product.category}</span></div>
+      <div class="info-row"><strong>카테고리</strong><span>${product.categories.join(" · ")}</span></div>
     `;
   }
 
