@@ -100,9 +100,9 @@ p { margin: 0 0 1em; }
   display: flex;
   align-items: center;
 }
-.logo-img { height: 68px; width: auto; display: block; }
+.logo-img { height: 88px; width: auto; display: block; }
 @media (max-width: 560px) {
-  .logo-img { height: 46px; }
+  .logo-img { height: 60px; }
 }
 
 .gnb { display: flex; gap: 40px; }
