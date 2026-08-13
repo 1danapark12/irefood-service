@@ -31,21 +31,20 @@
   }
 
   function renderPreview(products, wrap) {
+    // 주력 매출 카테고리인 마라탕·훠궈 재료 위주로 노출 (같은 재료군 내에서 다양하게 선정)
+    const malatang = products.filter((p) => p.categories.includes("마라탕·훠궈 재료"));
     const seen = new Set();
     const picks = [];
-    // 마라탕·훠궈 재료(주력 매출 카테고리)를 먼저 노출
-    const featured = products.find((p) => p.categories.includes("마라탕·훠궈 재료"));
-    if (featured) {
-      picks.push(featured);
-      featured.categories.forEach((c) => seen.add(c));
-    }
-    for (const p of products) {
-      if (picks.includes(p)) continue;
-      const newCats = p.categories.filter((c) => !seen.has(c));
-      if (newCats.length === 0) continue;
-      newCats.forEach((c) => seen.add(c));
+    for (const p of malatang) {
+      const otherCat = p.categories.find((c) => c !== "마라탕·훠궈 재료") || "마라탕·훠궈 재료";
+      if (seen.has(otherCat)) continue;
+      seen.add(otherCat);
       picks.push(p);
       if (picks.length === 6) break;
+    }
+    for (const p of malatang) {
+      if (picks.length === 6) break;
+      if (!picks.includes(p)) picks.push(p);
     }
     wrap.innerHTML = picks.map((p) => cardHTML(p)).join("");
   }

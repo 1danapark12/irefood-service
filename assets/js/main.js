@@ -38,4 +38,14 @@ document.addEventListener("DOMContentLoaded", () => {
       showSlide((current + 1) % heroSlides.length);
     }, 5000);
   }
+
+  // 네이버 스마트스토어 바로가기 (모든 페이지 우측 하단 고정)
+  const storeLink = document.createElement("a");
+  storeLink.href = "https://smartstore.naver.com/sunbong_food";
+  storeLink.target = "_blank";
+  storeLink.rel = "noopener";
+  storeLink.className = "smartstore-float";
+  storeLink.setAttribute("aria-label", "네이버 스마트스토어로 이동 (새 창)");
+  storeLink.innerHTML = '<span class="smartstore-badge">N</span><span>스마트스토어 바로가기</span>';
+  document.body.appendChild(storeLink);
 });

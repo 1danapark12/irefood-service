@@ -400,6 +400,52 @@ p { margin: 0 0 1em; }
 .footer-meta p { margin: 2px 0; }
 .footer-copyright { margin-top: 20px; color: #6b665b; font-size: 0.8rem; }
 
+/* ===== 네이버 스마트스토어 플로팅 버튼 ===== */
+.smartstore-float {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #03c75a;
+  color: #fff;
+  padding: 13px 20px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  box-shadow: 0 10px 24px rgba(3, 199, 90, 0.35);
+  text-decoration: none;
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+.smartstore-float:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 28px rgba(3, 199, 90, 0.45);
+}
+.smartstore-badge {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  color: #03c75a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 0.75rem;
+  flex-shrink: 0;
+}
+@media (max-width: 560px) {
+  .smartstore-float {
+    right: 16px;
+    bottom: 16px;
+    padding: 11px 14px;
+    font-size: 0.72rem;
+  }
+}
+
 /* ===== 반응형 ===== */
 @media (max-width: 860px) {
   .gnb { display: none; }
