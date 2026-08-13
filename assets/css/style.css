@@ -277,6 +277,21 @@ p { margin: 0 0 1em; }
   background: var(--color-charcoal);
 }
 .gallery-card .img-placeholder { position: absolute; inset: 0; min-height: unset; }
+.gallery-card img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+}
+.gallery-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(28, 26, 23, 0.1) 0%, rgba(28, 26, 23, 0.9) 100%);
+  z-index: 1;
+}
 .gallery-card h3 {
   position: relative;
   z-index: 2;
