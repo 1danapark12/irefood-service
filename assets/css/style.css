@@ -116,8 +116,9 @@ header.solid{background:rgba(17,17,17,.92)}
 .biz-card{position:relative;height:640px;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;padding:36px;color:#fff}
 .biz-card .bg{position:absolute;inset:0;background-size:cover;background-position:center;transition:transform .8s ease}
 .biz-card:hover .bg{transform:scale(1.07)}
-.biz-card:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 25%,rgba(0,0,0,.62) 55%,rgba(0,0,0,.92) 100%)}
-.biz-card>*{position:relative;z-index:1}
+.biz-card:after{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(0,0,0,0) 25%,rgba(0,0,0,.62) 55%,rgba(0,0,0,.92) 100%)}
+.biz-card>*{position:relative;z-index:2}
+.biz-card>.bg{position:absolute;z-index:0}
 .biz-card small{font-family:var(--serif);font-size:18px;letter-spacing:.25em;color:#fff;font-weight:600}
 .biz-card h3{font-size:28px;margin:8px 0 10px;font-weight:700}
 .biz-card p{margin:0;font-size:16px;color:#e4e0d6}
@@ -253,7 +254,7 @@ footer li a{text-decoration:underline;text-underline-offset:3px}
 .fg input:focus,.fg textarea:focus{outline:2px solid var(--gold);border-color:var(--gold)}
 .fg.ck{display:flex;gap:10px;align-items:flex-start;font-size:14px;color:#555}
 .fg.ck input{margin-top:4px}
-.fg .honeypot{position:absolute;left:-9999px}
+.honeypot{position:absolute!important;left:-9999px;width:1px;height:1px;opacity:0;pointer-events:none}
 .form button[type=submit]{height:58px;padding:0 44px;border-radius:29px;border:0;background:var(--black);color:#fff;font-size:18px}
 .form button[disabled]{opacity:.4;cursor:not-allowed}
 .form-status{margin-top:16px;font-size:16px}
@@ -310,6 +311,8 @@ footer li a{text-decoration:underline;text-underline-offset:3px}
   .scrolling a{width:260px}
   .sec-biz{padding-top:80px}
   .biz-grid{grid-template-columns:1fr}.biz-card{height:380px}
+  .biz-card:after{background:linear-gradient(180deg,rgba(0,0,0,.05) 15%,rgba(0,0,0,.7) 45%,rgba(0,0,0,.94) 100%)}
+  .biz-card h3,.biz-card p{text-shadow:0 1px 10px rgba(0,0,0,.6)}
   .sec03-inner{padding:80px 20px}
   .list-rows li a{padding:24px 4px;flex-direction:column;align-items:flex-start;gap:8px}
   .list-rows .tx{font-size:18px}
