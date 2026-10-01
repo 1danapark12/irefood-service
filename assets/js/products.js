@@ -1,133 +1,102 @@
-// 제품: /data/products.json을 읽어 HOME 미리보기, 제품 목록(필터+검색), 제품 상세를 렌더링
+// 제품: data/products.json → 홈 롤링, 제품 목록(필터·검색·더보기), 상세, 견적 담기
 (function () {
-  const dataUrl = (window.SITE_ROOT || "./") + "data/products.json";
+  const ROOT = window.SITE_ROOT || "./";
+  const KEY = "irefood_quote";
+  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
-  async function loadProducts() {
-    const res = await fetch(dataUrl);
-    if (!res.ok) throw new Error("제품 데이터를 불러오지 못했습니다.");
-    return res.json();
+  const cart = {
+    get() { try { return JSON.parse(localStorage.getItem(KEY)) || []; } catch (e) { return []; } },
+    set(v) { try { localStorage.setItem(KEY, JSON.stringify(v)); } catch (e) {} document.dispatchEvent(new Event("cart:change")); },
+    has(id) { return this.get().some((x) => x.id === id); },
+    toggle(p) {
+      const c = this.get();
+      const i = c.findIndex((x) => x.id === p.id);
+      i >= 0 ? c.splice(i, 1) : c.push({ id: p.id, name: p.name });
+      this.set(c);
+    },
+  };
+  window.IRE_CART = cart;
+
+  const meta = (p) => [p.storage, p.origin].filter((v) => v && v !== "-").join(" · ") || p.categories.join(" · ");
+  const imgTag = (p, cls = "") => p.image ? `<img src="${ROOT}${p.image}" alt="${esc(p.name)}" loading="lazy" ${cls}>` : `<span>이미지 준비 중</span>`;
+
+  function card(p) {
+    return `<article class="pcard">
+      <a href="${ROOT}pages/product-detail.html?id=${p.id}" class="im">${imgTag(p)}</a>
+      <div class="bd"><h3>${esc(p.name)}</h3><small>${esc(meta(p))}</small></div>
+      <button type="button" class="add ${cart.has(p.id) ? "on" : ""}" data-id="${p.id}">${cart.has(p.id) ? "✓ 견적 담김" : "+ 견적 담기"}</button>
+    </article>`;
   }
 
-  function metaLine(p) {
-    const parts = [p.storage, p.origin].filter((v) => v && v !== "-");
-    return parts.length ? parts.join(" · ") : p.categories.join(" · ");
+  // 홈: 세로 롤링 (마라탕·훠궈 재료 우선, 사진 있는 제품만)
+  function rolling(products, wrap) {
+    const pool = products.filter((p) => p.image);
+    const first = pool.filter((p) => p.categories.includes("마라탕·훠궈 재료"));
+    const picks = [...first.slice(0, 7), ...pool.filter((p) => !first.slice(0, 7).includes(p)).filter((_, i) => i % 29 === 0).slice(0, 5)];
+    const html = picks.map((p) => `<a href="${ROOT}pages/product-detail.html?id=${p.id}"><img src="${ROOT}${p.image}" alt="${esc(p.name)}" loading="lazy"><p>${esc(p.name)}</p></a>`).join("");
+    wrap.innerHTML = html + html; // 무한 롤링용 복제
   }
 
-  function cardHTML(p) {
-    const root = window.SITE_ROOT || "./";
-    const href = `${root}pages/product-detail.html?id=${p.id}`;
-    const img = p.image
-      ? `<img src="${root}${p.image}" alt="${p.name}" loading="lazy">`
-      : `<div class="img-placeholder" role="img" aria-label="${p.name} 이미지 (준비 중)">이미지 준비 중<br>${p.name}</div>`;
-    return `
-      <a class="card" href="${href}" style="display:block;">
-        ${img}
-        <div class="card-body">
-          <h3>${p.name}</h3>
-          <p>${metaLine(p)}</p>
-        </div>
-      </a>
-    `;
-  }
-
-  function renderPreview(products, wrap) {
-    // 주력 매출 카테고리인 마라탕·훠궈 재료 위주로 노출 (같은 재료군 내에서 다양하게 선정)
-    const malatang = products.filter((p) => p.categories.includes("마라탕·훠궈 재료"));
-    const seen = new Set();
-    const picks = [];
-    for (const p of malatang) {
-      const otherCat = p.categories.find((c) => c !== "마라탕·훠궈 재료") || "마라탕·훠궈 재료";
-      if (seen.has(otherCat)) continue;
-      seen.add(otherCat);
-      picks.push(p);
-      if (picks.length === 6) break;
-    }
-    for (const p of malatang) {
-      if (picks.length === 6) break;
-      if (!picks.includes(p)) picks.push(p);
-    }
-    wrap.innerHTML = picks.map((p) => cardHTML(p)).join("");
-  }
-
-  function renderGrid(products, wrap) {
-    wrap.innerHTML = products.length
-      ? products.map((p) => cardHTML(p)).join("")
-      : `<p style="color:var(--color-stone);">검색 결과가 없습니다.</p>`;
-  }
-
-  function renderFilterBar(products, bar, grid, searchInput) {
-    const rest = [...new Set(products.flatMap((p) => p.categories))].filter(
-      (c) => c !== "마라탕·훠궈 재료"
-    );
-    const categories = ["전체", "마라탕·훠궈 재료", ...rest];
-    bar.innerHTML = categories
-      .map((c, i) => `<button type="button" class="${i === 0 ? "active" : ""}" data-category="${c}">${c} (${c === "전체" ? products.length : products.filter((p) => p.categories.includes(c)).length})</button>`)
-      .join("");
-
-    function applyFilter() {
-      const activeBtn = bar.querySelector("button.active");
-      const cat = activeBtn ? activeBtn.dataset.category : "전체";
-      const q = (searchInput ? searchInput.value : "").trim();
-      let filtered = cat === "전체" ? products : products.filter((p) => p.categories.includes(cat));
-      if (q) filtered = filtered.filter((p) => p.name.includes(q));
-      renderGrid(filtered, grid);
-    }
-
-    bar.querySelectorAll("button").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        bar.querySelectorAll("button").forEach((b) => b.classList.remove("active"));
-        btn.classList.add("active");
-        applyFilter();
-      });
+  const PAGE = 24;
+  function list(products, grid, filterBar, search, moreBtn) {
+    let cat = "전체", shown = PAGE, rows = products;
+    const cats = ["전체", "마라탕·훠궈 재료", ...[...new Set(products.flatMap((p) => p.categories))].filter((c) => c !== "마라탕·훠궈 재료")];
+    filterBar.innerHTML = cats.map((c, i) => `<button type="button" class="${i ? "" : "active"}" data-c="${esc(c)}">${esc(c)}</button>`).join("");
+    const render = () => {
+      grid.innerHTML = rows.length ? rows.slice(0, shown).map(card).join("") : `<p>검색 결과가 없습니다.</p>`;
+      moreBtn.style.display = rows.length > shown ? "" : "none";
+    };
+    const apply = () => {
+      const q = search.value.trim().toLowerCase();
+      rows = products.filter((p) => (cat === "전체" || p.categories.includes(cat)) && (!q || p.name.toLowerCase().includes(q)));
+      shown = PAGE; render();
+    };
+    filterBar.addEventListener("click", (e) => {
+      const b = e.target.closest("button"); if (!b) return;
+      filterBar.querySelectorAll("button").forEach((x) => x.classList.remove("active"));
+      b.classList.add("active"); cat = b.dataset.c; apply();
     });
-
-    if (searchInput) {
-      searchInput.addEventListener("input", applyFilter);
-    }
+    search.addEventListener("input", apply);
+    moreBtn.addEventListener("click", () => { shown += PAGE; render(); });
+    document.addEventListener("cart:change", () => grid.querySelectorAll(".add").forEach((b) => {
+      const on = cart.has(Number(b.dataset.id)); b.classList.toggle("on", on); b.textContent = on ? "✓ 견적 담김" : "+ 견적 담기";
+    }));
+    render();
   }
 
-  function renderDetail(products, wrap) {
-    const root = window.SITE_ROOT || "./";
-    const params = new URLSearchParams(window.location.search);
-    const id = params.get("id");
-    const product = products.find((p) => String(p.id) === id) || products[0];
-    if (!product) {
-      wrap.innerHTML = "<p>등록된 제품이 없습니다.</p>";
-      return;
-    }
-    document.title = `${product.name} — 이레푸드서비스 주식회사`;
-    const img = product.image
-      ? `<img src="${root}${product.image}" alt="${product.name}" style="width:100%; max-width:420px; display:block;">`
-      : `<div class="img-placeholder" style="min-height:320px;" role="img" aria-label="${product.name} 이미지 (준비 중)">이미지 준비 중<br>${product.name}</div>`;
-    wrap.innerHTML = `
-      ${img}
-      <h1 style="margin-top:24px;">${product.name}</h1>
-      <div class="info-row"><strong>보관방법</strong><span>${product.storage}</span></div>
-      <div class="info-row"><strong>원산지</strong><span>${product.origin}</span></div>
-      <div class="info-row"><strong>카테고리</strong><span>${product.categories.join(" · ")}</span></div>
-    `;
+  function detail(products, wrap) {
+    const id = new URLSearchParams(location.search).get("id");
+    const p = products.find((x) => String(x.id) === id) || products[0];
+    document.title = `${p.name} — 이레푸드서비스 주식회사`;
+    wrap.innerHTML = `<div class="im">${imgTag(p)}</div>
+      <div><h1>${esc(p.name)}</h1>
+        <div class="info-row"><strong>보관방법</strong><span>${esc(p.storage || "-")}</span></div>
+        <div class="info-row"><strong>원산지</strong><span>${esc(p.origin || "-")}</span></div>
+        <div class="info-row"><strong>카테고리</strong><span>${esc(p.categories.join(" · "))}</span></div>
+        <div class="btns"><button type="button" class="pill" data-add>${cart.has(p.id) ? "✓ 견적 담김" : "+ 견적 담기"}</button><a class="pill line" href="${ROOT}pages/customer.html#inquiry">견적 문의하러 가기</a></div>
+      </div>`;
+    wrap.querySelector("[data-add]").addEventListener("click", (e) => { cart.toggle(p); e.target.textContent = cart.has(p.id) ? "✓ 견적 담김" : "+ 견적 담기"; });
+  }
+
+  // 하단 견적 바
+  function cartBar() {
+    const bar = document.createElement("div");
+    bar.className = "cart-bar";
+    bar.innerHTML = `<span data-n></span><a class="pill" href="${ROOT}pages/customer.html#inquiry">견적 문의하기</a>`;
+    document.body.appendChild(bar);
+    const upd = () => { const n = cart.get().length; bar.querySelector("[data-n]").textContent = `담은 제품 ${n}개`; bar.classList.toggle("show", n > 0); };
+    document.addEventListener("cart:change", upd); upd();
   }
 
   document.addEventListener("DOMContentLoaded", () => {
-    const previewWrap = document.querySelector("[data-product-preview]");
-    const gridWrap = document.querySelector("[data-product-grid]");
-    const filterBar = document.querySelector("[data-product-filter]");
-    const searchInput = document.querySelector("[data-product-search]");
-    const detailWrap = document.querySelector("[data-product-detail]");
-    if (!previewWrap && !gridWrap && !detailWrap) return;
-
-    loadProducts()
-      .then((products) => {
-        if (previewWrap) renderPreview(products, previewWrap);
-        if (gridWrap) {
-          renderGrid(products, gridWrap);
-          if (filterBar) renderFilterBar(products, filterBar, gridWrap, searchInput);
-        }
-        if (detailWrap) renderDetail(products, detailWrap);
-      })
-      .catch((err) => {
-        const target = previewWrap || gridWrap || detailWrap;
-        if (target) target.innerHTML = `<p>${err.message}</p>`;
-      });
+    const roll = document.querySelector("[data-rolling]");
+    const grid = document.querySelector("[data-product-grid]");
+    const det = document.querySelector("[data-product-detail]");
+    if (!roll && !grid && !det) return;
+    fetch(ROOT + "data/products.json").then((r) => { if (!r.ok) throw 0; return r.json(); }).then((products) => {
+      if (roll) rolling(products, roll);
+      if (grid) { list(products, grid, document.querySelector("[data-product-filter]"), document.querySelector("[data-product-search]"), document.querySelector("[data-more]")); cartBar(); grid.addEventListener("click", (e) => { const b = e.target.closest(".add"); if (b) cart.toggle(products.find((x) => x.id === Number(b.dataset.id))); }); }
+      if (det) { detail(products, det); cartBar(); }
+    }).catch(() => { (roll || grid || det).innerHTML = "<p>제품 데이터를 불러오지 못했습니다. 로컬 서버(http://localhost)로 열어주세요.</p>"; });
   });
 })();

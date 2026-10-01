@@ -1,59 +1,53 @@
-// 1:1 문의: Formspree AJAX 제출
-// ⚠️ 각 페이지 <form data-contact-form action="https://formspree.io/f/YOUR_FORM_ID"> 의
-// action 값을 실제 발급받은 Formspree 엔드포인트로 교체할 것 (README 참고)
-// Formspree endpoint는 서버 시크릿이 아닌 공개 식별자이므로 코드에 직접 넣어도 안전함
-
+// 1:1 문의: 담아둔 견적 제품 표시 + 동의 체크 시 전송 활성화 + Formspree(AJAX), 미설정 시 메일 앱으로 대체
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.querySelector("[data-contact-form]");
   if (!form) return;
-
+  const btn = form.querySelector("button[type=submit]");
   const consent = form.querySelector("#consent");
-  const submitBtn = form.querySelector('button[type="submit"]');
-  const statusEl = form.querySelector("[data-form-status]");
+  const status = form.querySelector("[data-form-status]");
+  const msg = form.querySelector("#message");
+  const box = document.querySelector("[data-quote-box]");
+  const sync = () => { btn.disabled = !consent.checked; };
+  consent.addEventListener("change", sync); sync();
 
-  if (consent && submitBtn) {
-    submitBtn.disabled = true;
-    consent.addEventListener("change", () => {
-      submitBtn.disabled = !consent.checked;
-    });
+  const items = () => (window.IRE_CART ? window.IRE_CART.get() : (() => { try { return JSON.parse(localStorage.getItem("irefood_quote")) || []; } catch (e) { return []; } })());
+  function renderBox() {
+    const c = items();
+    if (!box) return;
+    box.hidden = !c.length;
+    box.querySelector("ul").innerHTML = c.map((x) => `<li><span>${x.name}</span><button type="button" data-rm="${x.id}">삭제</button></li>`).join("");
   }
+  box?.addEventListener("click", (e) => {
+    const id = e.target.dataset.rm; if (!id) return;
+    const c = items().filter((x) => String(x.id) !== id);
+    try { localStorage.setItem("irefood_quote", JSON.stringify(c)); } catch (er) {}
+    renderBox();
+  });
+  renderBox();
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
-
-    // 허니팟: 봇이 채운 경우 조용히 무시
-    const honeypot = form.querySelector('input[name="_gotcha"]');
-    if (honeypot && honeypot.value) return;
-
-    if (consent && !consent.checked) {
-      statusEl.textContent = "개인정보 수집·이용에 동의해주세요.";
-      statusEl.className = "form-status error";
+    if (form.querySelector(".honeypot").value) return;
+    const c = items();
+    const quote = c.length ? `\n\n[견적 요청 제품]\n${c.map((x) => "- " + x.name).join("\n")}` : "";
+    const data = new FormData(form);
+    data.set("message", msg.value + quote);
+    const endpoint = form.getAttribute("action");
+    if (/YOUR_FORM_ID/.test(endpoint)) {
+      // Formspree 미설정: 메일 앱으로 대체 전송
+      const body = `이름: ${data.get("name")}\n연락처: ${data.get("phone")}\n이메일: ${data.get("email")}\n\n${data.get("message")}`;
+      location.href = `mailto:irefood@irefood.com?subject=${encodeURIComponent("[홈페이지 문의] " + data.get("name"))}&body=${encodeURIComponent(body)}`;
+      status.textContent = "메일 앱이 열립니다. 전송 버튼을 눌러 문의를 완료해주세요.";
       return;
     }
-
-    submitBtn.disabled = true;
-    statusEl.textContent = "전송 중...";
-    statusEl.className = "form-status";
-
+    btn.disabled = true; status.textContent = "전송 중…";
     try {
-      const res = await fetch(form.action, {
-        method: "POST",
-        headers: { Accept: "application/json" },
-        body: new FormData(form),
-      });
-
-      if (res.ok) {
-        statusEl.textContent = "문의가 접수되었습니다. 빠른 시일 내에 답변드리겠습니다.";
-        statusEl.className = "form-status success";
-        form.reset();
-      } else {
-        throw new Error("전송에 실패했습니다. 잠시 후 다시 시도해주세요.");
-      }
-    } catch (err) {
-      statusEl.textContent = err.message || "전송 중 오류가 발생했습니다.";
-      statusEl.className = "form-status error";
-    } finally {
-      submitBtn.disabled = !(consent ? consent.checked : true);
-    }
+      const r = await fetch(endpoint, { method: "POST", body: data, headers: { Accept: "application/json" } });
+      if (!r.ok) throw 0;
+      form.reset(); sync();
+      try { localStorage.removeItem("irefood_quote"); } catch (er) {}
+      renderBox();
+      status.textContent = "문의가 접수되었습니다. 확인 후 빠르게 연락드리겠습니다.";
+    } catch (er) { status.textContent = "전송에 실패했습니다. 전화(010-4751-1668)로 문의해주세요."; btn.disabled = false; }
   });
 });
