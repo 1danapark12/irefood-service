@@ -5,8 +5,8 @@
 
 ## 구조
 - `build.py` : 공통 헤더/푸터를 모든 HTML에 넣어 생성 → 메뉴·연락처·연혁을 고칠 땐 이 파일 수정 후 `python3 build.py` (약관 3종은 `pages/`의 HTML을 직접 수정)
-- `data/products.json` (제품 487개), `data/notices.json` (공지) : 항목 추가로 운영
-- `assets/images/hero/` 히어로 사진, `assets/images/products/` 제품 사진(483개)
+- `data/products.json` (제품 649개), `data/notices.json` (공지) : 항목 추가로 운영
+- `assets/images/hero/` 히어로 사진, `assets/images/products/` 제품 사진(646개)
 
 ## 배포 전 확인
 1. 문의 폼: `build.py`의 `YOUR_FORM_ID`를 Formspree 폼 ID로 교체 (미설정 시 메일 앱으로 대체 전송)
