@@ -15,7 +15,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const c = items();
     if (!box) return;
     box.hidden = !c.length;
-    box.querySelector("ul").innerHTML = c.map((x) => `<li><span>${x.name}</span><button type="button" data-rm="${x.id}">삭제</button></li>`).join("");
+    const esc = (s) => String(s).replace(/[&<>"']/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
+    box.querySelector("ul").innerHTML = c.map((x) => `<li><span>${esc(x.name)}</span><button type="button" data-rm="${x.id}">삭제</button></li>`).join("");
   }
   box?.addEventListener("click", (e) => {
     const id = e.target.dataset.rm; if (!id) return;
