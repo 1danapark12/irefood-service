@@ -28,10 +28,10 @@
     </article>`;
   }
 
-  // 홈: 세로 롤링 (마라탕·훠궈 재료 우선, 사진 있는 제품만)
+  // 홈: 세로 롤링 (마라탕 우선, 사진 있는 제품만)
   function rolling(products, wrap) {
     const pool = products.filter((p) => p.image);
-    const first = pool.filter((p) => p.categories.includes("마라탕·훠궈 재료"));
+    const first = pool.filter((p) => p.categories.includes("마라탕"));
     const picks = [...first.slice(0, 7), ...pool.filter((p) => !first.slice(0, 7).includes(p)).filter((_, i) => i % 29 === 0).slice(0, 5)];
     const html = picks.map((p) => `<a href="${ROOT}pages/product-detail.html?id=${p.id}"><img src="${ROOT}${p.image}" alt="${esc(p.name)}" loading="lazy"><p>${esc(p.name)}</p></a>`).join("");
     wrap.innerHTML = html + html; // 무한 롤링용 복제
@@ -40,7 +40,9 @@
   const PAGE = 24;
   function list(products, grid, filterBar, search, moreBtn) {
     let cat = "전체", shown = PAGE, rows = products;
-    const cats = ["전체", "마라탕·훠궈 재료", ...[...new Set(products.flatMap((p) => p.categories))].filter((c) => c !== "마라탕·훠궈 재료")];
+    const ORDER = ["마라탕", "김치 장아찌 절임", "냉동냉장", "수산건어물육류", "쌀계란두부나물떡면", "일회용품포장세제", "장류,소스,기름,분말,통조림", "채소"];
+    const used = new Set(products.flatMap((p) => p.categories));
+    const cats = ["전체", ...ORDER.filter((c) => used.has(c)), ...[...used].filter((c) => !ORDER.includes(c))];
     filterBar.innerHTML = cats.map((c, i) => `<button type="button" class="${i ? "" : "active"}" data-c="${esc(c)}">${esc(c)}</button>`).join("");
     const render = () => {
       grid.innerHTML = rows.length ? rows.slice(0, shown).map(card).join("") : `<p>검색 결과가 없습니다.</p>`;
