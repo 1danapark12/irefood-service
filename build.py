@@ -9,6 +9,8 @@ SITE = "https://www.irefood.com"  # 정식 주소 (canonical, sitemap, og:url �
 TODAY = datetime.date.today()
 FOUNDED = 1998
 YEARS = TODAY.year - FOUNDED  # 업력: 빌드할 때마다 자동 계산 (숫자를 직접 쓰지 말 것)
+NAVER_VERIFY = "d1232523adb4906833ea39d5c0562d66070a8a9a"  # 네이버 서치어드바이저 소유확인
+GOOGLE_VERIFY = "5jVOTsCNLuo-kjPYA45SDNmiX0FaXkE50mFVW6SGGp4"  # 구글 서치콘솔 소유확인
 
 TEL, TEL_RAW, MAIL = "010-4751-1668", "01047511668", "irefood@irefood.com"
 ADDR = "경기 구리시 갈매순환로166번길 46 금강펜테리움 IX타워 B2 8,9호 (우:11901)"
@@ -106,6 +108,8 @@ def head(title, desc, root, path=None, extra=""):
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="naver-site-verification" content="{NAVER_VERIFY}">
+<meta name="google-site-verification" content="{GOOGLE_VERIFY}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
