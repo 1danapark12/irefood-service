@@ -14,5 +14,5 @@
 ## 배포 전 확인
 1. 문의 폼: `build.py`의 `YOUR_FORM_ID`를 Formspree 폼 ID로 교체 (미설정 시 메일 앱으로 대체 전송)
 2. 카카오맵: Kakao Developers > 플랫폼 > Web 에 배포 도메인 등록
-3. 약관 3종(`legal/`)은 게시 전 검토 — 개인정보처리방침의 보호책임자 성명/직책 기재 권장
+3. 약관 3종(`legal/`)은 게시 전 검토 — 개인정보 보호책임자: 박한나 (변경 시 legal/privacy.html 수정)
 4. 배포 후 네이버 서치어드바이저·구글 서치콘솔에 `https://www.irefood.com/sitemap.xml` 제출
