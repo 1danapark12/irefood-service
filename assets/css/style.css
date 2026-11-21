@@ -74,7 +74,15 @@ header.solid{background:rgba(17,17,17,.92)}
 @keyframes rise{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}}
 .hero-group{position:absolute;left:3.3vw;bottom:calc(3.5vw + 62px);z-index:5;display:flex;align-items:center;flex-wrap:wrap;gap:8px 18px;color:#fff;font-size:clamp(16px,1.35vw,20px);text-shadow:0 2px 14px rgba(0,0,0,.5)}
 .hero-group strong{font-weight:700;font-size:1.15em;letter-spacing:-.01em}
-.hero-group .lbl{font-size:.72em;font-weight:700;letter-spacing:.12em;color:#fff;background:var(--gold);padding:5px 12px;border-radius:99px;text-shadow:none}
+.hero-group .lbl{position:relative;display:inline-block;padding:1.5px;border-radius:99px;overflow:hidden;background:rgba(176,138,78,.55);text-shadow:none;box-shadow:0 0 18px rgba(214,174,104,.35)}
+.hero-group .lbl:before,.hero-group .lbl:after{content:"";position:absolute;width:300%;height:60%;border-radius:50%;background:radial-gradient(circle,#fff1c9,transparent 11%);z-index:0}
+.hero-group .lbl:before{bottom:-9px;right:-250%;animation:lbl-star-b 4.5s linear infinite alternate}
+.hero-group .lbl:after{top:-9px;left:-250%;animation:lbl-star-t 4.5s linear infinite alternate}
+.hero-group .lbl span{position:relative;z-index:1;display:block;padding:5px 13px;border-radius:99px;font-size:.72em;font-weight:700;letter-spacing:.12em;color:#fff;background:linear-gradient(120deg,transparent 38%,rgba(255,255,255,.6) 50%,transparent 62%) 150% 0/220% 100% no-repeat,linear-gradient(180deg,#c09a5c,#8f6d38);animation:lbl-shine 3.2s ease-in-out infinite}
+@keyframes lbl-star-b{0%{transform:translate(0,0);opacity:1}100%{transform:translate(-100%,0);opacity:0}}
+@keyframes lbl-star-t{0%{transform:translate(0,0);opacity:1}100%{transform:translate(100%,0);opacity:0}}
+@keyframes lbl-shine{0%,35%{background-position:150% 0,0 0}100%{background-position:-60% 0,0 0}}
+@media (prefers-reduced-motion:reduce){.hero-group .lbl:before,.hero-group .lbl:after,.hero-group .lbl span{animation:none}}
 .hero-group ul{display:flex;flex-wrap:wrap;gap:6px 0;margin:0;padding:0;list-style:none;font-weight:500}
 .hero-group li+li:before{content:"";display:inline-block;width:1px;height:.85em;background:rgba(255,255,255,.55);margin:0 14px;vertical-align:-.05em}
 .navi-bar{position:absolute;left:3.3vw;bottom:3.5vw;width:calc(100% - 6.6vw);display:flex;align-items:center;justify-content:space-between;z-index:5;color:#fff}
