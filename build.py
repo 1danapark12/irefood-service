@@ -261,6 +261,7 @@ def home():
 <section class="sec01">
   <ul class="slides">{sl}
   </ul>
+  <div class="hero-group"><strong>이레푸드서비스(주)</strong><span class="lbl">자회사</span><ul><li>이레글로벌</li><li>(주)강한글로벌</li><li>(주)창신주류</li></ul></div>
   <div class="navi-bar">
     <div><div class="progress"><span class="num"></span><span class="bar"><span class="fill"></span></span></div>
       <button type="button" class="pp" aria-label="슬라이드 멈춤"><i></i><i></i></button></div>
