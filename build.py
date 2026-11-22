@@ -236,18 +236,17 @@ def js(root, *names):
 # ---------------------------------------------------------------- HOME
 def home():
     slides = [
-        ("coldchain", "SOURCING", "Fresh from the Source,", "산지에서 고른 신선한 식자재를 셰프의 주방까지 전해드립니다."),
-        ("sourcing", "LOGISTICS", "Delivered with Care,", "수도권 전역을 잇는 물류망으로 안정적인 납품을 약속합니다."),
-        ("quality", "QUALITY", "Quality You Can Trust.", "검수부터 콜드체인까지, 품질을 끝까지 책임집니다."),
-        ("partners", "PARTNERS", "Partner of Every Kitchen.", "음식점·프랜차이즈·단체급식, 모든 주방의 든든한 파트너입니다."),
+        ("coldchain", "SOURCING", "Fresh from the Source", "산지에서 고른 신선한 식자재", "셰프의 주방까지 그대로 전해드립니다."),
+        ("sourcing", "LOGISTICS", "Delivered with Care", "수도권 전역을 잇는 물류망", "안정적인 납품을 약속합니다."),
+        ("quality", "QUALITY", "Quality You Can Trust", "검수부터 콜드체인까지", "품질을 끝까지 책임집니다."),
+        ("partners", "PARTNERS", "Partner of Every Kitchen", "모든 주방의 든든한 파트너", "음식점·프랜차이즈·단체급식에 식자재를 공급합니다."),
     ]
     sl = ""
-    for i, (img, tag, h, p) in enumerate(slides):
+    for i, (img, tag, en, h, p) in enumerate(slides):
         sl += f"""
       <li class="slide{' active' if i == 0 else ''}">
-        <div class="bg"><span style="background-image:url(assets/images/hero/{img}.jpg)"></span></div>
-        <img class="slide-logo" src="assets/images/logo-white.png?v=2" alt="" aria-hidden="true">
-        <div class="slide-txt"><span class="tag">{tag}</span><h2>{h}</h2><p>{p}</p></div>
+        <div class="bg"><span style="background-image:url(assets/images/hero/{img}.webp)"></span></div>
+        <div class="slide-txt"><span class="tag">{tag}<i>{en}</i></span><h2>{h}</h2><p>{p}</p></div>
       </li>"""
     biz = [
         ("coldchain", "01 · SOURCING", "공산품 · 중국식품", "마라탕·훠궈 재료부터 소스·면류까지 폭넓은 품목을 취급합니다."),
@@ -255,13 +254,14 @@ def home():
         ("quality", "03 · QUALITY", "육류 · 냉동식품", "엄격한 검수를 거친 육류와 냉동식품을 공급합니다."),
         ("partners", "04 · PARTNERS", "프랜차이즈 · 단체급식", "전국 매장 표준화 공급과 정기 납품 체계를 갖췄습니다."),
     ]
-    bz = "".join(f'<a href="pages/business.html" class="biz-card"><div class="bg" style="background-image:url(assets/images/hero/{i}.jpg)"></div><small>{s}</small><h3>{t}</h3><p>{d}</p></a>' for i, s, t, d in biz)
+    bz = "".join(f'<a href="pages/business.html" class="biz-card"><div class="bg" style="background-image:url(assets/images/hero/{i}.webp)"></div><small>{s}</small><h3>{t}</h3><p>{d}</p></a>' for i, s, t, d in biz)
     body = f"""
 <main id="top">
 <section class="sec01">
   <ul class="slides">{sl}
   </ul>
   <div class="hero-group"><strong>이레푸드서비스(주)</strong><span class="lbl"><span>자회사</span></span><ul><li>이레글로벌</li><li>(주)강한글로벌</li><li>(주)창신주류</li></ul></div>
+  <div class="hero-cta"><a class="primary" href="pages/customer.html#inquiry">견적 문의</a><a href="pages/product.html">제품 보기</a></div>
   <div class="navi-bar">
     <div><div class="progress"><span class="num"></span><span class="bar"><span class="fill"></span></span></div>
       <button type="button" class="pp" aria-label="슬라이드 멈춤"><i></i><i></i></button></div>
@@ -308,7 +308,7 @@ def home():
 """
     website = {"@context": "https://schema.org", "@type": "WebSite", "@id": SITE + "/#website", "url": SITE + "/",
                "name": "이레푸드서비스 주식회사", "inLanguage": "ko-KR", "publisher": {"@id": SITE + "/#organization"}}
-    extra = '<link rel="preload" as="image" href="assets/images/hero/coldchain.jpg" fetchpriority="high">\n' + ld(org_ld(), website)
+    extra = '<link rel="preload" as="image" href="assets/images/hero/coldchain.webp" fetchpriority="high">\n' + ld(org_ld(), website)
     return (head("이레푸드서비스 주식회사 | 식자재 전문 유통·공급",
                  "이레푸드서비스 주식회사 — 1998년 설립, 마라탕·훠궈·한식·중식 등 요식업용 식자재 전문 유통·공급. 서울·수도권 일반 음식점, 프랜차이즈, 단체급식을 위한 신뢰할 수 있는 파트너입니다.", "./", "", extra)
             + header("./") + body + footer("./", js("./", "products", "notices")))
@@ -333,7 +333,7 @@ HIST = [
 
 def company():
     tl = "".join(f'<div class="tl-year reveal"><h3>{y}</h3><ul>' + "".join(f"<li><b>{m}</b> {t}</li>" for m, t in it) + "</ul></div>" for y, it in HIST)
-    body = sub_hero("Company", "1998년부터 이어온 신뢰, 이레푸드서비스", [("인사말", "#greeting"), ("연혁", "#history"), ("오시는 길", "#location")], R + "assets/images/hero/sourcing.jpg", "이레푸드서비스 회사소개") + f"""
+    body = sub_hero("Company", "1998년부터 이어온 신뢰, 이레푸드서비스", [("인사말", "#greeting"), ("연혁", "#history"), ("오시는 길", "#location")], R + "assets/images/hero/sourcing.webp", "이레푸드서비스 회사소개") + f"""
 <main id="top">
 <section class="wrap-in" id="greeting">
   <h2 class="sec-title">Greeting</h2><p class="sec-sub">인사말</p>
@@ -376,7 +376,7 @@ def company():
 def business():
     cats = categories()
     cat_rows = "".join(f'<li><b>{esc(c)}</b><span>{len(ns)}개 품목</span></li>' for c, ns in cats)
-    body = sub_hero("Business", "산지-물류-주방을 하나로 잇는 유통망", [], R + "assets/images/hero/quality.jpg", "이레푸드서비스 사업소개") + f"""
+    body = sub_hero("Business", "산지-물류-주방을 하나로 잇는 유통망", [], R + "assets/images/hero/quality.webp", "이레푸드서비스 사업소개") + f"""
 <main id="top">
 <section class="wrap-in">
   <p class="biz-intro reveal">이레푸드서비스 주식회사는 공산품부터 신선식품, 수산물, 육류까지 폭넓은 카테고리를 취급하며, 산지–물류–주방을 하나로 잇는 유통망을 갖추고 있습니다.</p>
@@ -422,7 +422,7 @@ def business():
 
 def product():
     groups = "".join(f'<h3>{esc(c)} <small>({len(ns)})</small></h3><p>{" · ".join(esc(n) for n in ns)}</p>' for c, ns in categories())
-    body = sub_hero("Product", "마라탕·훠궈 재료를 비롯한 식자재 제품 목록", [], R + "assets/images/hero/coldchain.jpg", "이레푸드서비스 취급 제품") + """
+    body = sub_hero("Product", "마라탕·훠궈 재료를 비롯한 식자재 제품 목록", [], R + "assets/images/hero/coldchain.webp", "이레푸드서비스 취급 제품") + """
 <main id="top"><section class="wrap-in">
   <p class="prod-note">아래는 대표 제품 일부이며, 이 밖에도 훨씬 더 많은 품목을 취급하고 있습니다. 찾으시는 제품이 없다면 <a href="customer.html#inquiry">문의</a> 또는 <a href="tel:__TELRAW__">전화(__TEL__)</a>로 알려주세요.</p>
   <input type="search" class="search" data-product-search placeholder="제품명 검색 (예: 당면, 마라)" aria-label="제품명 검색">
@@ -439,12 +439,12 @@ def product():
 
 
 def product_detail():
-    body = sub_hero("Product", "제품 상세", [("← 제품 목록", "product.html")], R + "assets/images/hero/coldchain.jpg") + '<main id="top"><section class="wrap-in"><div class="detail" data-product-detail>불러오는 중…</div></section></main>\n'
+    body = sub_hero("Product", "제품 상세", [("← 제품 목록", "product.html")], R + "assets/images/hero/coldchain.webp") + '<main id="top"><section class="wrap-in"><div class="detail" data-product-detail>불러오는 중…</div></section></main>\n'
     return head("제품 상세 | 이레푸드서비스 주식회사", "이레푸드서비스 취급 제품 상세", R, None) + header(R, "PRODUCT", True) + body + footer(R, js(R, "products"))
 
 
 def customer():
-    body = sub_hero("Customer", "공지사항과 1:1 문의", [("공지사항", "#notice"), ("1:1 문의", "#inquiry")], R + "assets/images/hero/partners.jpg", "공지사항·견적 문의") + f"""
+    body = sub_hero("Customer", "공지사항과 1:1 문의", [("공지사항", "#notice"), ("1:1 문의", "#inquiry")], R + "assets/images/hero/partners.webp", "공지사항·견적 문의") + f"""
 <main id="top">
 <section class="wrap-in" id="notice">
   <h2 class="sec-title">Notice</h2><p class="sec-sub">공지사항</p>
@@ -471,7 +471,7 @@ def customer():
 
 
 def notice_detail():
-    body = sub_hero("Notice", "공지사항", [("← 공지 목록", "customer.html#notice")], R + "assets/images/hero/partners.jpg") + '<main id="top"><section class="wrap-in"><div data-notice-detail>불러오는 중…</div><a class="back more-btn" href="customer.html#notice" style="width:auto;padding:0 28px">목록으로</a></section></main>\n'
+    body = sub_hero("Notice", "공지사항", [("← 공지 목록", "customer.html#notice")], R + "assets/images/hero/partners.webp") + '<main id="top"><section class="wrap-in"><div data-notice-detail>불러오는 중…</div><a class="back more-btn" href="customer.html#notice" style="width:auto;padding:0 28px">목록으로</a></section></main>\n'
     return head("공지사항 | 이레푸드서비스 주식회사", "이레푸드서비스 공지사항", R, None) + header(R, "CUSTOMER", True) + body + footer(R, js(R, "notices"))
 
 
@@ -486,7 +486,7 @@ def legal(slug, title):
         inner = m.group(1) if m else ""
         inner = re.sub(r'<p[^>]*>※[^<]*</p>', '', inner)
         inner = re.sub(r'\sstyle="[^"]*"', '', inner)
-    body = sub_hero(title, "", [], R + "assets/images/hero/sourcing.jpg") + f'<main id="top"><section class="wrap-in"><div class="doc">{inner}</div></section></main>\n'
+    body = sub_hero(title, "", [], R + "assets/images/hero/sourcing.webp") + f'<main id="top"><section class="wrap-in"><div class="doc">{inner}</div></section></main>\n'
     return head(f"{title} | 이레푸드서비스 주식회사", f"이레푸드서비스 주식회사 {title}", R, f"pages/{slug}.html") + header(R, "", True) + body + footer(R, "")
 
 
