@@ -26,6 +26,29 @@ NOTICES = sorted(json.load(open(os.path.join(ROOT, "data", "notices.json"), enco
 CAT_ORDER = ["마라탕", "김치 장아찌 절임", "냉동냉장", "수산건어물육류", "쌀계란두부나물떡면", "일회용품포장세제", "장류,소스,기름,분말,통조림", "채소"]
 
 
+MALA_N = sum("마라탕" in p["categories"] for p in PRODUCTS)
+# 검색에서 잡으려는 말. meta keywords · 구조화 데이터 · llms.txt 가 함께 쓴다.
+KEYWORDS = [
+    "식자재 도매", "식자재 납품", "식자재 납품업체", "업소용 식자재", "식자재 유통", "식자재 매일 배송",
+    "마라탕 재료 도매", "마라탕 식자재", "마라탕 소스 도매", "훠궈 재료 도매", "훠궈 식자재",
+    "중국식자재 도매", "중국식품 도매", "분모자 도매", "피쉬볼 도매", "중국당면 도매",
+    "식당 창업 식자재", "마라탕 창업 재료", "프랜차이즈 식자재 공급", "단체급식 식자재",
+    "구리 식자재", "남양주 식자재", "하남 식자재", "서울 식자재 납품", "이레푸드서비스",
+]
+# 강점 4가지 — 홈·사업소개·llms.txt 가 함께 쓴다. (경쟁사 언급 없이 우리 서비스만 말한다)
+STRENGTHS = [
+    ("중국식품 전문 구색", f"마라탕·훠궈 소스, 분모자, 피쉬볼, 중국당면 등 시중에서 구하기 어려운 중국 식자재 {MALA_N}개 품목 이상을 도매로 납품합니다."),
+    ("친절하고 빠른 상담", "중국 식자재가 처음이어도 괜찮습니다. 필요한 재료와 규격을 한국어로 쉽고 빠르게 안내해 드립니다."),
+    ("식자재 원스톱 공급", "중국식품에 설탕·조미료·밀가루 등 일반 식자재와 육류, 매일 가락시장·구리시장에서 들여오는 채소까지 한 번에 공급합니다."),
+    ("월~토 매일 배송", "서울·수도권 전역에 월요일부터 토요일까지 매일 납품합니다."),
+]
+TARGETS = [
+    ("마라탕·훠궈 식당", "운영 중인 매장의 재료 정기 납품"),
+    ("신규 오픈 준비 식당", "초도 재료 구성부터 상담"),
+    ("한식·분식 등 일반 식당", "업종별 식자재 맞춤 공급"),
+]
+
+
 def esc(s):
     return _html.escape(str(s), quote=True)
 
@@ -51,7 +74,7 @@ def org_ld():
         "url": SITE + "/",
         "logo": SITE + "/assets/images/logo-color.png",
         "image": SITE + "/assets/images/og-image.jpg",
-        "description": f"{FOUNDED}년 설립된 요식업용 식자재 전문 유통·공급 회사. 마라탕·훠궈 재료와 중국식품을 중심으로 한식·중식·분식·일식·양식 식자재를 일반 음식점, 프랜차이즈, 단체급식에 공급합니다.",
+        "description": f"{FOUNDED}년 설립된 요식업용 식자재 전문 유통·공급 회사. 마라탕·훠궈 재료 등 중국식품과 한식·중식·분식·일식·양식 일반 식자재, 채소를 서울·수도권 음식점, 프랜차이즈, 단체급식에 월~토 매일 배송합니다.",
         "foundingDate": "1998-05",
         "telephone": "+82-10-4751-1668",
         "email": MAIL,
@@ -66,6 +89,11 @@ def org_ld():
         },
         "areaServed": [{"@type": "AdministrativeArea", "name": n} for n in ("서울특별시", "경기도", "인천광역시")],
         "sameAs": list(SNS.values()),
+        "slogan": "모든 식자재 월~토 매일 배송",
+        "keywords": ", ".join(KEYWORDS),
+        "knowsAbout": ["식자재 유통", "마라탕 재료", "훠궈 재료", "중국식품", "업소용 식자재", "프랜차이즈 식자재 공급", "단체급식 식자재"],
+        "hasOfferCatalog": {"@type": "OfferCatalog", "name": "취급 식자재", "itemListElement": [
+            {"@type": "OfferCatalog", "name": c, "numberOfItems": len(ns)} for c, ns in categories()]},
     }
 
 
@@ -98,7 +126,7 @@ def head(title, desc, root, path=None, extra=""):
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{title}</title>
 <meta name="description" content="{desc}">
-<meta name="keywords" content="식자재유통, 식자재공급, 마라탕 식자재, 훠궈 식자재, 중국식품 유통, 이레푸드서비스">
+<meta name="keywords" content="{", ".join(KEYWORDS)}">
 {canon}<meta property="og:site_name" content="이레푸드서비스 주식회사">
 <meta property="og:locale" content="ko_KR">
 <meta property="og:title" content="{title}">
@@ -110,9 +138,11 @@ def head(title, desc, root, path=None, extra=""):
 <meta name="twitter:card" content="summary_large_image">
 <meta name="naver-site-verification" content="{NAVER_VERIFY}">
 <meta name="google-site-verification" content="{GOOGLE_VERIFY}">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,500&display=swap" rel="stylesheet">
 <link rel="icon" type="image/png" href="{root}assets/images/favicon.png?v=2">
 <link rel="stylesheet" href="{root}assets/css/style.css">
 <script>window.SITE_ROOT = "{root}";</script>
@@ -121,7 +151,7 @@ def head(title, desc, root, path=None, extra=""):
 
 
 def header(root, active="", solid=False):
-    pages = root + "pages/" if root == "./" else ""
+    pages = "" if root == "../" else root + "pages/"
     lis = ""
     for name, href, subs in MENU:
         sub = "".join(f'<li><a href="{pages}{h}">{t}</a></li>' for t, h in subs)
@@ -156,7 +186,7 @@ def header(root, active="", solid=False):
 
 
 def footer(root, scripts):
-    pages = root + "pages/" if root == "./" else ""
+    pages = "" if root == "../" else root + "pages/"
     sns = "".join(f'<a href="{u}" target="_blank" rel="noopener">{n}</a>' for n, u in SNS.items())
     return f"""<footer>
   <img src="{root}assets/images/logo-white.png?v=2" alt="이레푸드서비스 주식회사" class="foot-logo">
@@ -179,29 +209,49 @@ def footer(root, scripts):
 """
 
 
-def sub_hero(title, sub, tabs, bg, ko=""):
-    """ko: H1 에 함께 넣을 한국어 제목 (화면에는 숨기고 검색엔진·스크린리더용으로만 노출)."""
-    t = "".join(f'<a href="{h}"{" class=on" if i == 0 and False else ""}>{n}</a>' for i, (n, h) in enumerate(tabs))
+def sub_hero(title, sub, tabs, bg, brand=False):
+    """title: 굵은 한글 제목(H1). brand=True 면 H1 앞에 회사명을 검색엔진·스크린리더용으로만 넣는다."""
+    t = "".join(f'<a href="{h}">{n}</a>' for n, h in tabs)
     t = f'<nav class="sub-tabs">{t}</nav>' if tabs else ""
-    k = f'<span class="sr-only"> — {ko}</span>' if ko else ""
+    k = '<span class="sr-only">이레푸드서비스 </span>' if brand else ""
+    p = f"<p>{sub}</p>" if sub else ""
     return f"""<section class="sub-hero"><div class="bg" style="background-image:url({bg})"></div>
-  <h1>{title}{k}</h1><p>{sub}</p>{t}</section>
+  <h1>{k}{title}</h1>{p}{t}</section>
 """
+
+
+def sec(title, desc=""):
+    """하위 페이지 섹션 제목 (+ 설명)."""
+    d = f'<p class="sec-desc">{desc}</p>' if desc else ""
+    return f'<h2 class="sec-title{" has-desc" if desc else ""}">{title}</h2>{d}'
 
 
 def notice_rows(ns, root):
     """notices.js 의 row() 와 같은 마크업. JS 가 없어도(크롤러) 공지가 보이도록 미리 그려 둔다."""
-    return "".join(f'<li><a href="{root}pages/notice-detail.html?id={n["id"]}"><div><p class="lt">Notice</p><p class="tx">{esc(n["title"])}</p></div><span class="dt">{n["date"].replace("-", ".")}</span></a></li>' for n in ns)
+    return "".join(f'<li><a href="{root}pages/notice-detail.html?id={n["id"]}"><div><p class="tx">{esc(n["title"])}</p></div><span class="dt">{n["date"].replace("-", ".")}</span></a></li>' for n in ns)
 
 
+FAQ_TOP = 4  # 홈에 보여 줄 질문 수 (FAQ 앞에서부터)
 FAQ = [
+    ("마라탕·훠궈 재료를 도매로 살 수 있나요?",
+     f"네. 마라탕 소스, 훠궈 소스, 분모자, 피쉬볼, 중국당면, 건두부, 목이버섯 등 마라탕·훠궈 재료 {MALA_N}개 품목을 음식점과 프랜차이즈에 도매로 납품합니다. 전화({TEL})나 1:1 문의로 품목을 알려 주시면 견적을 드립니다."),
+    ("식자재는 어느 지역에, 무슨 요일에 배송하나요?",
+     "서울과 수도권 전역에 월요일부터 토요일까지 매일 배송합니다. 본사가 경기 구리시에 있어 구리·남양주·하남 등 경기 동북부와 서울 동부권도 매일 납품합니다."),
+    ("식당 창업을 준비 중인데 식자재 거래처로 이용할 수 있나요?",
+     "네. 오픈에 필요한 초도 물량 구성부터 상담해 드립니다. 중국식품, 일반 식자재(설탕·조미료·밀가루 등), 채소, 육류를 한 곳에서 받을 수 있어 거래처를 여러 곳 둘 필요가 없습니다."),
+    ("분모자·피쉬볼·중국당면 같은 품목만 따로 주문할 수 있나요?",
+     "네. 필요한 품목만 골라 견적을 받을 수 있고, 소량은 네이버 스마트스토어에서 바로 주문하실 수 있습니다. 마라탕 소스 1kg, 즈마장 2.5kg 같은 업소용 대용량 제품도 취급합니다."),
     ("이레푸드서비스는 어떤 회사인가요?",
      f"1998년 서울 강동구 천호동에서 '이레유통'으로 시작해 {YEARS}년째 식자재를 유통하고 있는 회사입니다. 2014년 '이레글로벌', 2025년 6월 '이레푸드서비스 주식회사'로 사명을 바꿨고, 본사는 경기 구리시 갈매순환로166번길 46 금강펜테리움 IX타워에 있습니다."),
     ("어떤 식자재를 공급하나요?",
      "마라탕·훠궈 재료와 중국식품을 중심으로 소스·장류·기름·분말, 면류·떡·두부, 냉동·냉장식품, 수산·건어물·육류, 채소, 김치·절임류, 일회용품·포장재까지 요식업에 필요한 품목을 함께 공급합니다. "
      f"홈페이지 제품 목록에 등록된 대표 품목만 {len(PRODUCTS)}개이며, 목록에 없는 제품도 문의하시면 확인해 드립니다."),
-    ("배송 가능한 지역은 어디인가요?",
-     "서울과 수도권 전역에 자체 물류망으로 납품합니다. 그 밖의 지역은 전화나 1:1 문의로 가능 여부를 확인해 주세요."),
+    ("수도권 밖 지역도 배송되나요?",
+     "서울·수도권은 자체 물류망으로 납품합니다. 그 밖의 지역은 전화나 1:1 문의로 가능 여부를 확인해 주세요."),
+    ("중국식품과 일반 식자재를 한 곳에서 받을 수 있나요?",
+     "가능합니다. 마라탕·훠궈 재료 등 중국식품과 설탕·조미료·밀가루 같은 일반 식자재, 육류, 채소를 함께 납품합니다. 채소는 매일 가락시장·구리시장에서 들여옵니다."),
+    ("마라탕·훠궈 식당 창업 재료도 상담할 수 있나요?",
+     f"가능합니다. 소스·분모자·피쉬볼·중국당면 등 중국 식자재부터 일반 식자재, 채소, 육류까지 오픈에 필요한 초도 물량 구성을 한국어로 상담해 드립니다. 전화({TEL})나 1:1 문의로 연락해 주세요."),
     ("어떤 거래처와 거래하나요?",
      "한식·중식·분식·일식·양식 일반 음식점, 프랜차이즈 본사·가맹점, 단체급식이 주요 거래처입니다. 훠궈·마라탕 프랜차이즈(2025), 숯불갈비 프랜차이즈(2025), 분식 프랜차이즈(2023), 일식 프랜차이즈(2018)와 식자재 공급 업무협약을 맺었고, 서울 소재 보건소 구내식당(2013)에도 납품했습니다."),
     ("프랜차이즈 전용상품 물류도 가능한가요?",
@@ -213,14 +263,16 @@ FAQ = [
 ]
 
 
-def faq_html():
-    items = "".join(f'<details class="faq-item"><summary><h3>{esc(q)}</h3></summary><p>{esc(a)}</p></details>' for q, a in FAQ)
-    return f'<div class="faq reveal">{items}</div>'
+def faq_html(items=None):
+    items = FAQ if items is None else items
+    rows = "".join(f'<details class="faq-item"><summary><h3>{esc(q)}</h3></summary><p>{esc(a)}</p></details>' for q, a in items)
+    return f'<div class="faq">{rows}</div>'
 
 
-def faq_ld():
+def faq_ld(items=None):
+    items = FAQ if items is None else items
     return {"@context": "https://schema.org", "@type": "FAQPage",
-            "mainEntity": [{"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in FAQ]}
+            "mainEntity": [{"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in items]}
 
 
 def write(rel, html):
@@ -235,33 +287,53 @@ def js(root, *names):
 
 # ---------------------------------------------------------------- HOME
 def home():
+    # 첫 장은 대표 문구, 이어서 원래 문구 3장
     slides = [
-        ("coldchain", "SOURCING", "Fresh from the Source", "산지에서 고른 신선한 식자재", "셰프의 주방까지 그대로 전해드립니다."),
         ("sourcing", "LOGISTICS", "Delivered with Care", "수도권 전역을 잇는 물류망", "안정적인 납품을 약속합니다."),
         ("quality", "QUALITY", "Quality You Can Trust", "검수부터 콜드체인까지", "품질을 끝까지 책임집니다."),
         ("partners", "PARTNERS", "Partner of Every Kitchen", "모든 주방의 든든한 파트너", "음식점·프랜차이즈·단체급식에 식자재를 공급합니다."),
     ]
-    sl = ""
-    for i, (img, tag, en, h, p) in enumerate(slides):
-        sl += f"""
-      <li class="slide{' active' if i == 0 else ''}">
-        <div class="bg"><span style="background-image:url(assets/images/hero/{img}.webp)"></span></div>
-        <div class="slide-txt"><span class="tag">{tag}<i>{en}</i></span><h2>{h}</h2><p>{p}</p></div>
+    sl = """
+      <li class="slide active">
+        <div class="bg"><span style="background-image:url(assets/images/hero/coldchain.webp)"></span></div>
+        <div class="slide-txt main"><h1><span class="sr-only">모든 식자재 월~토 매일 배송</span><span class="split gold" aria-hidden="true" data-split>모든 식자재</span><span class="split" aria-hidden="true" data-split>월~토 매일 배송</span></h1><p>서울·수도권 음식점·프랜차이즈·단체급식 식자재 납품</p></div>
       </li>"""
+    for img, tag, en, h, d in slides:
+        sl += f"""
+      <li class="slide">
+        <div class="bg"><span style="background-image:url(assets/images/hero/{img}.webp)"></span></div>
+        <div class="slide-txt"><span class="tag">{tag}<i>{en}</i></span><h2>{h}</h2><p>{d}</p></div>
+      </li>"""
+    n = {c: len(ns) for c, ns in categories()}
     biz = [
-        ("coldchain", "01 · SOURCING", "공산품 · 중국식품", "마라탕·훠궈 재료부터 소스·면류까지 폭넓은 품목을 취급합니다."),
-        ("sourcing", "02 · LOGISTICS", "신선식품 · 수산물", "정교한 콜드체인으로 신선도를 지켜 배송합니다."),
-        ("quality", "03 · QUALITY", "육류 · 냉동식품", "엄격한 검수를 거친 육류와 냉동식품을 공급합니다."),
-        ("partners", "04 · PARTNERS", "프랜차이즈 · 단체급식", "전국 매장 표준화 공급과 정기 납품 체계를 갖췄습니다."),
+        ("coldchain", "공산품 · 중국식품", f"마라탕·훠궈 재료 {n['마라탕']}개, 장류·소스·기름·분말 {n['장류,소스,기름,분말,통조림']}개 품목"),
+        ("sourcing", "신선식품 · 수산물", "매일 가락시장·구리시장에서 들여오는 채소, 수산·건어물"),
+        ("quality", "육류 · 냉동식품", f"냉동·냉장식품 {n['냉동냉장']}개, 수산·건어물·육류 {n['수산건어물육류']}개 품목"),
+        ("partners", "프랜차이즈 · 단체급식", "매장 단위 표준화 공급, 전용상품 물류, 정기 납품"),
     ]
-    bz = "".join(f'<a href="pages/business.html" class="biz-card"><div class="bg" style="background-image:url(assets/images/hero/{i}.webp)"></div><small>{s}</small><h3>{t}</h3><p>{d}</p></a>' for i, s, t, d in biz)
+    bz = "".join(f'<a href="pages/business.html" class="biz-card"><div class="bg" style="background-image:url(assets/images/hero/{i}.webp)"></div><h3>{t}</h3><p>{d}</p></a>' for i, t, d in biz)
+    # 강점 줄마다 사진 한 장 (assets/images/why/). 실제 촬영본이 생기면 같은 파일 이름으로 바꿔 넣는다.
+    why_img = [("chinese", "분모자, 중국당면, 피쉬볼, 건두부 등 마라탕·훠궈 재료"), ("consult", "식자재 견적 상담 책상"),
+               ("onestop", "채소 상자와 밀가루, 식용유, 육류를 한데 모은 식자재"), ("delivery", "식당 뒷문에 도착한 식자재 배송 상자")]
+    why = "".join(f'<li{" class=on" if i == 0 else ""}><h3>{t}</h3><p>{d}</p><img src="assets/images/why/{im}.jpg" alt="{alt}" width="960" height="1200" loading="lazy"></li>'
+                  for i, ((t, d), (im, alt)) in enumerate(zip(STRENGTHS, why_img)))
+    why_ph = "".join(f'<img src="assets/images/why/{im}.jpg" alt="" width="960" height="1200" loading="lazy"{" class=on" if i == 0 else ""}>' for i, (im, alt) in enumerate(why_img))
+    tg = "".join(f"<li><b>{t}</b><span>{d}</span></li>" for t, d in TARGETS)
+    asks = [
+        ("마라탕·훠궈 재료", "소스·분모자·피쉬볼·중국당면 등 중국 식자재 견적"),
+        ("창업 식자재", "오픈 준비 매장의 초도 재료 구성 상담"),
+        ("정기 납품", "음식점·프랜차이즈·단체급식 대량·정기 납품 견적"),
+    ]
+    ak = "".join(f'<a href="pages/customer.html#inquiry" class="ask-card"><h3>{t}</h3><p>{d}</p><span>상담하기<i aria-hidden="true">&rarr;</i></span></a>' for t, d in asks)
     body = f"""
 <main id="top">
 <section class="sec01">
   <ul class="slides">{sl}
   </ul>
-  <div class="hero-group"><strong>이레푸드서비스(주)</strong><span class="lbl"><span>자회사</span></span><ul><li>이레글로벌</li><li>(주)강한글로벌</li><li>(주)창신주류</li></ul></div>
-  <div class="hero-cta"><a class="primary" href="pages/customer.html#inquiry">견적 문의</a><a href="pages/product.html">제품 보기</a></div>
+  <div class="hero-fixed">
+    <div class="hero-cta"><a class="primary" href="tel:{TEL_RAW}">{PHONE_SVG}{TEL}</a><a class="txt" href="pages/customer.html#inquiry">무료 견적 문의<i aria-hidden="true">&rarr;</i></a></div>
+    <div class="hero-group"><strong>이레푸드서비스(주)</strong><span class="lbl"><span>자회사</span></span><ul><li>이레글로벌</li><li>(주)강한글로벌</li><li>(주)창신주류</li></ul></div>
+  </div>
   <div class="navi-bar">
     <div><div class="progress"><span class="num"></span><span class="bar"><span class="fill"></span></span></div>
       <button type="button" class="pp" aria-label="슬라이드 멈춤"><i></i><i></i></button></div>
@@ -269,48 +341,71 @@ def home():
   </div>
 </section>
 
+<section class="sec-why">
+  <div class="why-inner">
+    <div class="why-head"><h2 class="hd-title">이레푸드서비스 강점</h2>
+      <p>중국식품부터 채소까지,<br>거래처 하나로 매일 받으세요.</p></div>
+    <div class="why-body">
+      <ul class="why-rows" data-peek>{why}</ul>
+      <div class="why-photo" aria-hidden="true">{why_ph}</div>
+    </div>
+    <div class="why-for"><strong>주요 거래처</strong><ul>{tg}</ul></div>
+  </div>
+</section>
+
 <section class="sec02">
   <div class="sec02-inner">
     <div class="sec02-div01">
       <div>
-        <h2 class="eyebrow reveal">Our Products</h2>
-        <h1 class="reveal">마라탕·훠궈 재료부터 <br class="pc">한식·중식·분식·일식·양식까지, <br class="pc"><b>요식업을 위한 <br class="mo">식자재 전문 공급</b>.</h1>
-        <div class="stats reveal">
-          <div><strong>{YEARS}</strong><span>년 업력 (1998년 설립)</span></div>
+        <h2>마라탕·훠궈 재료부터 <br class="pc">한식·중식·분식·일식·양식까지, <br class="pc">요식업을 위한 <br class="mo">식자재 전문 공급</h2>
+        <div class="stats">
+          <div><strong>{YEARS}</strong><span>년 업력</span></div>
           <div><strong>{len(PRODUCTS)}+</strong><span>대표 취급 품목</span></div>
         </div>
       </div>
-      <a href="pages/product.html" class="more-btn reveal">MORE</a>
+      <a href="pages/product.html" class="more-btn">제품 전체 보기</a>
     </div>
     <div class="sec02-div02"><div class="scrolling" data-rolling></div></div>
   </div>
 </section>
 
-<section class="sec-biz">
-  <div class="biz-head"><h2 class="eyebrow reveal">Business</h2>
-    <p class="reveal">산지 → 물류 → 셰프의 주방.<br>엄선한 소싱부터 정교한 콜드체인, 주방까지 이레푸드서비스가 책임지고 연결합니다.</p></div>
+<section class="sec-biz on-dark">
+  <div class="biz-head"><h2 class="hd-title">사업 영역</h2>
+    <p>공산품·중국식품부터 신선식품, 육류, 프랜차이즈 납품까지 한 회사가 맡습니다.</p></div>
   <div class="biz-grid">{bz}</div>
 </section>
 
 <section class="sec03">
   <div class="sec03-inner">
-    <div class="sec03-title"><h2 class="eyebrow reveal">Notice</h2><a href="pages/customer.html#notice" class="more-btn reveal">MORE</a></div>
-    <ul class="list-rows reveal" data-notice-preview>{notice_rows(NOTICES[:4], "./")}</ul>
+    <div class="sec03-title"><h2 class="hd-title">공지사항</h2><a href="pages/customer.html#notice" class="more-btn">전체 보기</a></div>
+    <ul class="list-rows" data-notice-preview>{notice_rows(NOTICES[:4], "./")}</ul>
   </div>
 </section>
 
-<section class="sec04">
-  <h2 class="eyebrow reveal">Inquiry</h2>
-  <p class="reveal">대량·정기 납품, 프랜차이즈 공급 문의를 남겨주세요.<br>소량 구매는 스마트스토어에서 바로 주문하실 수 있습니다.</p>
-  <div class="btns reveal"><a href="pages/customer.html#inquiry" class="pill">무료 견적 문의</a><a href="tel:{TEL_RAW}" class="pill line">전화 {TEL}</a><a href="{SNS['스마트스토어']}" target="_blank" rel="noopener" class="pill line">스마트스토어 (소량 구매)</a></div>
+<section class="sec-faq">
+  <div class="faq-inner">
+    <h2 class="hd-title">자주 묻는 질문</h2>
+    {faq_html(FAQ[:FAQ_TOP])}
+    <a href="pages/business.html#faq" class="more-btn faq-more">질문 전체 보기</a>
+  </div>
+</section>
+
+<section class="sec-ask">
+  <div class="ask-inner">
+    <div class="ask-head"><h2 class="hd-title">무료 견적 상담</h2>
+      <p>소량 구매는 스마트스토어에서 바로 주문하실 수 있습니다.</p></div>
+    <div class="ask-grid">{ak}</div>
+    <div class="ask-tel"><div><small>전화 상담</small><a class="num" href="tel:{TEL_RAW}">{PHONE_SVG}{TEL}</a></div>
+      <a href="{SNS['스마트스토어']}" target="_blank" rel="noopener" class="pill line">스마트스토어 (소량 구매)</a></div>
+  </div>
 </section>
 </main>
 """
     website = {"@context": "https://schema.org", "@type": "WebSite", "@id": SITE + "/#website", "url": SITE + "/",
                "name": "이레푸드서비스 주식회사", "inLanguage": "ko-KR", "publisher": {"@id": SITE + "/#organization"}}
-    extra = '<link rel="preload" as="image" href="assets/images/hero/coldchain.webp" fetchpriority="high">\n' + ld(org_ld(), website)
-    return (head("이레푸드서비스 주식회사 | 식자재 전문 유통·공급",
-                 "이레푸드서비스 주식회사 — 1998년 설립, 마라탕·훠궈·한식·중식 등 요식업용 식자재 전문 유통·공급. 서울·수도권 일반 음식점, 프랜차이즈, 단체급식을 위한 신뢰할 수 있는 파트너입니다.", "./", "", extra)
+    extra = '<link rel="preload" as="image" href="assets/images/hero/coldchain.webp" fetchpriority="high">\n' + ld(org_ld(), website, faq_ld(FAQ[:FAQ_TOP]))
+    return (head("식자재 도매·납품 이레푸드서비스 | 마라탕·훠궈 재료, 월~토 매일 배송",
+                 "식자재 도매·납품 전문 이레푸드서비스. 마라탕·훠궈 재료 등 중국식품과 일반 식자재, 채소, 육류를 서울·수도권 음식점·프랜차이즈·단체급식에 월~토 매일 배송합니다. 1998년 설립, 무료 견적 상담.", "./", "", extra)
             + header("./") + body + footer("./", js("./", "products", "notices")))
 
 
@@ -320,26 +415,26 @@ HIST = [
     ("2025", [("10월", "훠궈·마라탕 프랜차이즈 중국식품·신선식품 공급 업무협약"), ("6월", "숯불갈비 프랜차이즈 식자재 공급 업무협약"), ("6월", "'이레푸드서비스 주식회사'로 사명 변경 및 물류창고 확장 이전")]),
     ("2023", [("11월", "분식 프랜차이즈 식자재 공급 업무협약"), ("11월", "식자재 종합 쇼핑몰 '식봄' 입점"), ("11월", "중국 허베이성 소재 중국당면·분모자 생산 공장 국제무역부 담당자 미팅 및 중국 식품 직수입 협의"), ("6월", "유튜브·인스타그램 개설"), ("5월", "네이버 스마트스토어 입점"), ("1월", "한 식품 유통사와 중국식품·주류 수입 업무협약")]),
     ("2022", [("3월", "서울 강남구 대형 한식 식당 식자재 공급 업무협약")]),
-    ("2021", [("8월", "자회사 (주)강한글로벌 설립 — 충청·전라권 식자재 및 주류 공급")]),
+    ("2021", [("8월", "자회사 (주)강한글로벌 설립 (충청·전라권 식자재 및 주류 공급)")]),
     ("2020", [("3월", "통신판매업 신고")]),
     ("2018", [("6월", "일식 프랜차이즈 식자재 공급 및 전용상품 물류 공급 업무협약")]),
-    ("2017", [("7월", "물류창고 이전 — 경기도 하남시")]),
+    ("2017", [("7월", "물류창고 이전 (경기도 하남시)")]),
     ("2014", [("5월", "'이레글로벌'로 사명 변경")]),
     ("2013", [("8월", "서울 소재 보건소 구내식당 납품 협약")]),
     ("2009", [("2월", "종합식자재 도소매로 업무 확장")]),
-    ("1998", [("5월", "이레유통 설립 — 서울시 강동구 천호동")]),
+    ("1998", [("5월", "이레유통 설립 (서울시 강동구 천호동)")]),
 ]
 
 
 def company():
-    tl = "".join(f'<div class="tl-year reveal"><h3>{y}</h3><ul>' + "".join(f"<li><b>{m}</b> {t}</li>" for m, t in it) + "</ul></div>" for y, it in HIST)
-    body = sub_hero("Company", "1998년부터 이어온 신뢰, 이레푸드서비스", [("인사말", "#greeting"), ("연혁", "#history"), ("오시는 길", "#location")], R + "assets/images/hero/sourcing.webp", "이레푸드서비스 회사소개") + f"""
+    tl = "".join(f'<div class="tl-year"><h3>{y}</h3><ul>' + "".join(f"<li><b>{m}</b> {t}</li>" for m, t in it) + "</ul></div>" for y, it in HIST)
+    body = sub_hero("회사소개", "1998년부터 이어온 신뢰, 이레푸드서비스", [("인사말", "#greeting"), ("연혁", "#history"), ("오시는 길", "#location")], R + "assets/images/hero/sourcing.webp", True) + f"""
 <main id="top">
 <section class="wrap-in" id="greeting">
-  <h2 class="sec-title">Greeting</h2><p class="sec-sub">인사말</p>
+  {sec("인사말")}
   <div class="greeting">
-    <div class="poster reveal"><img src="{R}assets/images/poster-malatang.jpg" alt="이레푸드서비스 마라탕 식자재 유통 포스터" loading="lazy"></div>
-    <div class="reveal">
+    <div class="poster"><img src="{R}assets/images/poster-malatang.jpg" alt="이레푸드서비스 마라탕 식자재 유통 포스터" loading="lazy"></div>
+    <div>
       <p class="lead">산지에서 셰프의 주방까지,<br>품질과 신선도를 지키는 절제된 신뢰.</p>
       <p>1998년 서울 강동구 천호동에서 이레유통으로 시작한 이레푸드서비스 주식회사는 {YEARS}년간 신뢰를 최우선 가치로 삼아 식자재 유통업의 길을 걸어왔습니다.</p>
       <p>중국식품, 마라탕·훠궈 식자재를 비롯해 한식·중식·분식·일식·양식까지 폭넓은 품목을 취급하며, 일반 음식점부터 대형 프랜차이즈, 단체급식까지 다양한 고객군에 안정적인 공급망을 제공하고 있습니다.</p>
@@ -348,12 +443,12 @@ def company():
   </div>
 </section>
 <section class="bg-beige" id="history"><div class="wrap-in">
-  <h2 class="sec-title">History</h2><p class="sec-sub">연혁</p>
+  {sec("연혁")}
   <div class="timeline">{tl}</div>
 </div></section>
 <section class="wrap-in" id="location">
-  <h2 class="sec-title">Location</h2><p class="sec-sub">오시는 길</p>
-  <figure class="bldg reveal"><img src="{R}assets/images/building.jpg" alt="이레푸드서비스 주식회사 사옥 — 금강펜테리움 IX타워" loading="lazy"><figcaption>이레푸드서비스 본사 · 금강펜테리움 IX타워 B2</figcaption></figure>
+  {sec("오시는 길")}
+  <figure class="bldg"><img src="{R}assets/images/building.jpg" alt="이레푸드서비스 주식회사 본사 사옥, 금강펜테리움 IX타워" loading="lazy"></figure>
   <div class="loc">
     <div id="map" role="img" aria-label="이레푸드서비스 주식회사 위치 지도">지도를 불러오는 중…</div>
     <dl>
@@ -368,61 +463,62 @@ def company():
 </section>
 </main>
 """
-    return (head("회사소개 COMPANY | 이레푸드서비스 주식회사", "1998년 이레유통으로 시작한 이레푸드서비스 주식회사의 인사말과 연혁, 오시는 길(경기 구리시 갈매동 금강펜테리움 IX타워).", R, "pages/company.html",
+    return (head("회사소개 | 구리 식자재 유통 이레푸드서비스", "1998년 이레유통으로 시작한 이레푸드서비스 주식회사의 인사말과 연혁, 오시는 길(경기 구리시 갈매동 금강펜테리움 IX타워).", R, "pages/company.html",
                  ld(org_ld(), crumbs(("홈", ""), ("회사소개", "pages/company.html"))))
             + header(R, "COMPANY", True) + body + footer(R, js(R, "map")))
 
 
 def business():
     cats = categories()
+    st = "".join(f"<div><h3>{t}</h3><p>{d}</p></div>" for t, d in STRENGTHS)
     cat_rows = "".join(f'<li><b>{esc(c)}</b><span>{len(ns)}개 품목</span></li>' for c, ns in cats)
-    body = sub_hero("Business", "산지-물류-주방을 하나로 잇는 유통망", [], R + "assets/images/hero/quality.webp", "이레푸드서비스 사업소개") + f"""
+    body = sub_hero("사업소개", "산지-물류-주방을 하나로 잇는 유통망", [], R + "assets/images/hero/quality.webp", True) + f"""
 <main id="top">
 <section class="wrap-in">
-  <p class="biz-intro reveal">이레푸드서비스 주식회사는 공산품부터 신선식품, 수산물, 육류까지 폭넓은 카테고리를 취급하며, 산지–물류–주방을 하나로 잇는 유통망을 갖추고 있습니다.</p>
-  <div class="flow reveal">
-    <div><small>SOURCING</small><h3>공산품 / 중국식품</h3><p>마라탕·훠궈 재료, 소스, 면류</p></div>
-    <div><small>COLD CHAIN</small><h3>신선식품 / 수산물</h3><p>콜드체인 신선 배송</p></div>
-    <div><small>QUALITY</small><h3>육류 / 냉동식품</h3><p>검수된 원재료 공급</p></div>
-    <div><small>PARTNERS</small><h3>프랜차이즈 / 단체급식</h3><p>표준화·정기 납품</p></div>
+  <p class="biz-intro">이레푸드서비스 주식회사는 공산품부터 신선식품, 수산물, 육류까지 폭넓은 카테고리를 취급하며, 산지–물류–주방을 하나로 잇는 유통망을 갖추고 있습니다.</p>
+  <div class="flow">
+    <div><h3>공산품 / 중국식품</h3><p>마라탕·훠궈 재료, 소스, 면류</p></div>
+    <div><h3>신선식품 / 수산물</h3><p>콜드체인 신선 배송</p></div>
+    <div><h3>육류 / 냉동식품</h3><p>검수된 원재료 공급</p></div>
+    <div><h3>프랜차이즈 / 단체급식</h3><p>표준화·정기 납품</p></div>
   </div>
 </section>
 <section class="bg-beige"><div class="wrap-in">
-  <h2 class="sec-title">Clients</h2><p class="sec-sub">주요 거래처 유형</p>
-  <div class="three reveal">
+  {sec("주요 거래처 유형")}
+  <div class="three">
     <div><h3>일반 음식점</h3><p>한식·중식·분식·일식·양식 등 업종을 가리지 않는 맞춤 공급</p></div>
-    <div><h3>프랜차이즈</h3><p>전국 매장 단위 표준화 공급 및 전용상품 물류 지원</p></div>
+    <div><h3>프랜차이즈</h3><p>매장 단위 표준화 공급 및 전용상품 물류 지원</p></div>
     <div><h3>단체급식</h3><p>대량 수요에 대응하는 안정적인 정기 납품 체계</p></div>
   </div>
 </div></section>
 <section class="wrap-in">
-  <h2 class="sec-title">Strength</h2><p class="sec-sub">이레푸드서비스의 강점</p>
-  <div class="strength reveal">
-    <div><span>01</span><h3>품질</h3><p>산지부터 검수된 원재료와 콜드체인 유지로 신선도를 지킵니다.</p></div>
-    <div><span>02</span><h3>가격</h3><p>대량 유통망을 기반으로 합리적인 단가를 제공합니다.</p></div>
-    <div><span>03</span><h3>유통망</h3><p>서울, 수도권 전역을 아우르는 물류 네트워크를 갖추고 있습니다.</p></div>
-  </div>
+  {sec("이레푸드서비스 강점")}
+  <div class="strength">{st}</div>
   <div class="more-row"><a class="pill" style="background:#111;color:#fff" href="customer.html#inquiry">무료 견적 문의</a></div>
 </section>
 <section class="bg-beige" id="items"><div class="wrap-in">
-  <h2 class="sec-title">Items</h2><p class="sec-sub">분류별 대표 취급 품목 — 총 {len(PRODUCTS)}개 (홈페이지 등록 기준)</p>
-  <ul class="cat-count reveal">{cat_rows}</ul>
+  {sec("대표 취급 품목", f"분류별 총 {len(PRODUCTS)}개 (홈페이지 등록 기준)")}
+  <ul class="cat-count">{cat_rows}</ul>
   <div class="more-row"><a class="pill line" style="color:#111;border-color:#111" href="product.html">전체 제품 보기</a></div>
 </div></section>
 <section class="wrap-in" id="faq">
-  <h2 class="sec-title">FAQ</h2><p class="sec-sub">자주 묻는 질문</p>
+  {sec("자주 묻는 질문")}
   {faq_html()}
 </section>
 </main>
 """
-    return (head("사업소개 BUSINESS | 이레푸드서비스 주식회사", f"마라탕·훠궈 재료, 중국식품, 신선식품, 수산물, 육류를 서울·수도권 음식점·프랜차이즈·단체급식에 공급하는 이레푸드서비스의 사업소개, 대표 취급 품목 {len(PRODUCTS)}개, 자주 묻는 질문.", R, "pages/business.html",
-                 ld(org_ld(), faq_ld(), crumbs(("홈", ""), ("사업소개", "pages/business.html"))))
+    return (head("식자재 납품·프랜차이즈 공급 사업소개 | 이레푸드서비스", f"마라탕·훠궈 재료, 중국식품, 신선식품, 수산물, 육류를 서울·수도권 음식점·프랜차이즈·단체급식에 월~토 매일 배송하는 이레푸드서비스의 사업소개, 대표 취급 품목 {len(PRODUCTS)}개, 자주 묻는 질문.", R, "pages/business.html",
+                 ld(org_ld(), faq_ld(FAQ[FAQ_TOP:]), crumbs(("홈", ""), ("사업소개", "pages/business.html"))))
             + header(R, "BUSINESS", True) + body + footer(R, ""))
 
 
 def product():
-    groups = "".join(f'<h3>{esc(c)} <small>({len(ns)})</small></h3><p>{" · ".join(esc(n) for n in ns)}</p>' for c, ns in categories())
-    body = sub_hero("Product", "마라탕·훠궈 재료를 비롯한 식자재 제품 목록", [], R + "assets/images/hero/coldchain.webp", "이레푸드서비스 취급 제품") + """
+    by_cat = {}
+    for x in PRODUCTS:
+        for c in x["categories"]:
+            by_cat.setdefault(c, []).append(x)
+    groups = "".join(f'<h3>{esc(c)} <small>({len(ns)})</small></h3><p>' + " · ".join(f'<a href="products/{x["id"]}.html">{esc(x["name"])}</a>' for x in by_cat[c]) + "</p>" for c, ns in categories())
+    body = sub_hero("취급 제품", "마라탕·훠궈 재료를 비롯한 식자재 제품 목록", [], R + "assets/images/hero/coldchain.webp", True) + """
 <main id="top"><section class="wrap-in">
   <p class="prod-note">아래는 대표 제품 일부이며, 이 밖에도 훨씬 더 많은 품목을 취급하고 있습니다. 찾으시는 제품이 없다면 <a href="customer.html#inquiry">문의</a> 또는 <a href="tel:__TELRAW__">전화(__TEL__)</a>로 알려주세요.</p>
   <input type="search" class="search" data-product-search placeholder="제품명 검색 (예: 당면, 마라)" aria-label="제품명 검색">
@@ -433,25 +529,82 @@ def product():
 </section></main>
 """
     body = body.replace("__TELRAW__", TEL_RAW).replace("__TEL__", TEL).replace("__N__", str(len(PRODUCTS))).replace("__GROUPS__", groups)
-    return (head("취급 제품 PRODUCT | 이레푸드서비스 주식회사", f"이레푸드서비스 주식회사 취급 제품 목록 {len(PRODUCTS)}개 — 마라탕·훠궈 재료, 소스·장류, 면류, 냉동·냉장식품, 수산·육류, 채소, 일회용품.", R, "pages/product.html",
+    return (head("마라탕·훠궈 재료, 업소용 식자재 제품 목록 | 이레푸드서비스", f"이레푸드서비스 주식회사 취급 제품 목록 {len(PRODUCTS)}개: 마라탕·훠궈 재료, 소스·장류, 면류, 냉동·냉장식품, 수산·육류, 채소, 일회용품.", R, "pages/product.html",
                  ld(crumbs(("홈", ""), ("취급 제품", "pages/product.html"))))
             + header(R, "PRODUCT", True) + body + footer(R, js(R, "products")))
 
 
 def product_detail():
-    body = sub_hero("Product", "제품 상세", [("← 제품 목록", "product.html")], R + "assets/images/hero/coldchain.webp") + '<main id="top"><section class="wrap-in"><div class="detail" data-product-detail>불러오는 중…</div></section></main>\n'
-    return head("제품 상세 | 이레푸드서비스 주식회사", "이레푸드서비스 취급 제품 상세", R, None) + header(R, "PRODUCT", True) + body + footer(R, js(R, "products"))
+    """예전 주소(product-detail.html?id=N). products.js 가 pages/products/N.html 로 넘긴다."""
+    body = sub_hero("제품 상세", "", [("← 제품 목록", "product.html")], R + "assets/images/hero/coldchain.webp") + '<main id="top"><section class="wrap-in"><div class="detail" data-product-detail>불러오는 중…</div></section></main>\n'
+    return head("제품 상세 | 이레푸드서비스", "이레푸드서비스 취급 제품 상세", R, None, '<meta name="robots" content="noindex,follow">\n') + header(R, "PRODUCT", True) + body + footer(R, js(R, "products"))
+
+
+RR = "../../"  # pages/products/ 에서 본 사이트 루트
+
+
+def product_page(x, related):
+    """제품 한 개의 고정 주소 페이지. 검색에 품목 이름으로 잡히도록 내용을 HTML 로 미리 그려 둔다."""
+    name, cat = x["name"], x["categories"][0]
+    path = f"pages/products/{x['id']}.html"
+    img = f'<img src="{RR}{x["image"]}" alt="{esc(name)}">' if x.get("image") else "<span>이미지 준비 중</span>"
+    rel = "".join(f'<a href="{r["id"]}.html" class="rel-card">' + (f'<img src="{RR}{r["image"]}" alt="" loading="lazy">' if r.get("image") else "<span></span>") + f"<p>{esc(r['name'])}</p></a>" for r in related)
+    body = sub_hero("취급 제품", "", [("← 제품 목록", "../product.html")], RR + "assets/images/hero/coldchain.webp") + f"""
+<main id="top"><section class="wrap-in">
+  <div class="detail" data-static-product data-id="{x['id']}" data-name="{esc(name)}">
+    <div class="im">{img}</div>
+    <div><h1>{esc(name)}</h1>
+      <div class="info-row"><strong>보관방법</strong><span>{esc(x.get('storage') or '-')}</span></div>
+      <div class="info-row"><strong>원산지</strong><span>{esc(x.get('origin') or '-')}</span></div>
+      <div class="info-row"><strong>카테고리</strong><span>{esc(' · '.join(x['categories']))}</span></div>
+      <p class="detail-note">이레푸드서비스가 음식점·프랜차이즈·단체급식에 도매로 납품하는 품목입니다. 서울·수도권에 월~토 매일 배송하며, 견적 상담은 무료입니다.</p>
+      <div class="btns"><button type="button" class="pill" data-add>+ 견적 담기</button><a class="pill line" href="tel:{TEL_RAW}">전화 {TEL}</a><a class="pill line" href="../customer.html#inquiry">견적 문의</a></div>
+    </div>
+  </div>
+  <h2 class="rel-title">{esc(cat)} 분류의 다른 제품</h2>
+  <div class="rel-grid">{rel}</div>
+</section></main>
+"""
+    prod = {"@context": "https://schema.org", "@type": "Product", "name": name, "category": cat, "url": SITE + "/" + path,
+            "description": f"{name} 업소용 도매 납품. 서울·수도권 월~토 매일 배송.",
+            "brand": {"@type": "Organization", "@id": SITE + "/#organization", "name": "이레푸드서비스 주식회사"}}
+    if x.get("image"):
+        prod["image"] = SITE + "/" + x["image"]
+    return (head(f"{name} 도매·업소 납품 | 이레푸드서비스", f"{name} 업소용 도매 납품. 서울·수도권 음식점·프랜차이즈·단체급식에 월~토 매일 배송, 무료 견적 {TEL}.", RR, path,
+                 ld(prod, crumbs(("홈", ""), ("취급 제품", "pages/product.html"), (name, path))))
+            + header(RR, "PRODUCT", True) + body + footer(RR, js(RR, "products")))
+
+
+def product_pages():
+    """모든 제품 페이지를 쓰고, 목록에서 빠진 제품의 예전 페이지는 지운다. 사이트맵에 넣을 경로를 돌려준다."""
+    by_cat = {}
+    for x in PRODUCTS:
+        by_cat.setdefault(x["categories"][0], []).append(x)
+    paths = []
+    for x in PRODUCTS:
+        sib = by_cat[x["categories"][0]]
+        i = sib.index(x)
+        related = [sib[(i + k) % len(sib)] for k in range(1, min(8, len(sib) - 1) + 1)]
+        path = f"pages/products/{x['id']}.html"
+        write(path, product_page(x, related))
+        paths.append(path)
+    folder = os.path.join(ROOT, "pages", "products")
+    keep = {f"{x['id']}.html" for x in PRODUCTS}
+    for f in os.listdir(folder):
+        if re.fullmatch(r"\d+\.html", f) and f not in keep:
+            os.remove(os.path.join(folder, f))
+    return paths
 
 
 def customer():
-    body = sub_hero("Customer", "공지사항과 1:1 문의", [("공지사항", "#notice"), ("1:1 문의", "#inquiry")], R + "assets/images/hero/partners.webp", "공지사항·견적 문의") + f"""
+    body = sub_hero("공지사항·문의", "대량·정기 납품 무료 견적 상담", [("공지사항", "#notice"), ("1:1 문의", "#inquiry")], R + "assets/images/hero/partners.webp", True) + f"""
 <main id="top">
 <section class="wrap-in" id="notice">
-  <h2 class="sec-title">Notice</h2><p class="sec-sub">공지사항</p>
+  {sec("공지사항")}
   <ul class="list-rows" data-notice-list>{notice_rows(NOTICES, R)}</ul>
 </section>
 <section class="bg-beige" id="inquiry"><div class="wrap-in">
-  <h2 class="sec-title">Inquiry</h2><p class="sec-sub">대량·정기 납품 상담은 문의를 남겨주세요. 급하시면 <a href="tel:{TEL_RAW}" style="text-decoration:underline">{TEL}</a> 로 전화 주세요.</p>
+  {sec("1:1 문의", f'대량·정기 납품 상담은 문의를 남겨주세요. 급하시면 <a href="tel:{TEL_RAW}" style="text-decoration:underline">{TEL}</a> 로 전화 주세요.')}
   <div class="quote-box" data-quote-box hidden><h4>견적 요청 제품</h4><ul></ul></div>
   <form class="form" data-contact-form action="https://formspree.io/f/xzezqbll" method="POST">
     <input type="text" name="_gotcha" class="honeypot" tabindex="-1" autocomplete="off" aria-hidden="true">
@@ -466,12 +619,12 @@ def customer():
 </div></section>
 </main>
 """
-    return head("공지사항·문의 CUSTOMER | 이레푸드서비스 주식회사", "이레푸드서비스 공지사항과 대량·정기 납품, 프랜차이즈 식자재 공급 1:1 견적 문의.", R, "pages/customer.html",
+    return head("식자재 납품 무료 견적 문의 | 이레푸드서비스", "식자재 대량·정기 납품, 마라탕·훠궈 재료 도매, 프랜차이즈 식자재 공급 무료 견적 문의와 이레푸드서비스 공지사항.", R, "pages/customer.html",
                 ld(crumbs(("홈", ""), ("공지사항·문의", "pages/customer.html")))) + header(R, "CUSTOMER", True) + body + footer(R, js(R, "notices", "contact", "products"))
 
 
 def notice_detail():
-    body = sub_hero("Notice", "공지사항", [("← 공지 목록", "customer.html#notice")], R + "assets/images/hero/partners.webp") + '<main id="top"><section class="wrap-in"><div data-notice-detail>불러오는 중…</div><a class="back more-btn" href="customer.html#notice" style="width:auto;padding:0 28px">목록으로</a></section></main>\n'
+    body = sub_hero("공지사항", "", [("← 공지 목록", "customer.html#notice")], R + "assets/images/hero/partners.webp") + '<main id="top"><section class="wrap-in"><div data-notice-detail>불러오는 중…</div><a class="back more-btn" href="customer.html#notice" style="width:auto;padding:0 28px">목록으로</a></section></main>\n'
     return head("공지사항 | 이레푸드서비스 주식회사", "이레푸드서비스 공지사항", R, None) + header(R, "CUSTOMER", True) + body + footer(R, js(R, "notices"))
 
 
@@ -494,8 +647,8 @@ SITEMAP = [("", "1.0"), ("pages/company.html", "0.8"), ("pages/business.html", "
            ("pages/customer.html", "0.7"), ("pages/terms.html", "0.2"), ("pages/privacy.html", "0.2"), ("pages/email-policy.html", "0.2")]
 
 
-def sitemap():
-    urls = "".join(f"  <url><loc>{SITE}/{p}</loc><lastmod>{TODAY.isoformat()}</lastmod><priority>{pr}</priority></url>\n" for p, pr in SITEMAP)
+def sitemap(extra=()):
+    urls = "".join(f"  <url><loc>{SITE}/{p}</loc><lastmod>{TODAY.isoformat()}</lastmod><priority>{pr}</priority></url>\n" for p, pr in list(SITEMAP) + [(e, "0.5") for e in extra])
     return f'<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n{urls}</urlset>\n'
 
 
@@ -508,9 +661,21 @@ def llms():
     cats = "\n".join(f"- {c}: {len(ns)}개 (예: {', '.join(ns[:4])})" for c, ns in categories())
     faq = "\n\n".join(f"### {q}\n{a}" for q, a in FAQ)
     hist = "\n".join(f"- {y}년 {m} {t}" for y, it in HIST for m, t in it)
+    strengths = "\n".join(f"- {t}: {d}" for t, d in STRENGTHS)
+    targets = "\n".join(f"- {t}: {d}" for t, d in TARGETS)
+    kw = "\n".join(f"- {k}" for k in KEYWORDS if k != "이레푸드서비스")
     return f"""# 이레푸드서비스 주식회사 (IREFOOD SERVICE CORPORATION)
 
-> {FOUNDED}년 설립된 요식업용 식자재 전문 유통·공급 회사. 마라탕·훠궈 재료와 중국식품을 중심으로 한식·중식·분식·일식·양식 식자재를 서울·수도권의 일반 음식점, 프랜차이즈, 단체급식에 공급합니다.
+> {FOUNDED}년 설립된 요식업용 식자재 전문 유통·공급 회사. 마라탕·훠궈 재료 등 중국식품과 한식·중식·분식·일식·양식 일반 식자재, 채소를 서울·수도권의 일반 음식점, 프랜차이즈, 단체급식에 월~토 매일 배송합니다.
+
+## 강점
+{strengths}
+
+## 주요 거래처
+{targets}
+
+## 이런 것을 찾는 분께 맞습니다
+{kw}
 
 ## 기본 정보
 - 회사명: 이레푸드서비스 주식회사 (구 이레유통 → 이레글로벌 → 2025년 6월 현 사명)
@@ -518,8 +683,8 @@ def llms():
 - 본사: {ADDR}
 - 사업자등록번호: 557-81-02236
 - 전화: {TEL} / 이메일: {MAIL}
-- 공급 지역: 서울·수도권
-- 주요 거래처: 일반 음식점, 프랜차이즈, 단체급식
+- 공급 지역: 서울·수도권 (월~토 매일 배송)
+- 거래처 유형: 일반 음식점, 프랜차이즈, 단체급식
 - 온라인 주문(소량): 네이버 스마트스토어 {SNS['스마트스토어']}, 식자재 쇼핑몰 '식봄'
 
 ## 주요 페이지
@@ -551,7 +716,7 @@ if __name__ == "__main__":
     write("pages/terms.html", legal("terms", "이용약관"))
     write("pages/privacy.html", legal("privacy", PRIVACY_NAME))
     write("pages/email-policy.html", legal("email-policy", "이메일무단수집거부"))
-    write("sitemap.xml", sitemap())
+    write("sitemap.xml", sitemap(product_pages()))
     write("robots.txt", robots())
     write("llms.txt", llms())
     print("built")

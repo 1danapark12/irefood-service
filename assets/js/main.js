@@ -44,11 +44,22 @@ document.addEventListener("DOMContentLoaded", () => {
   // 맨 위로
   $(".scroll-top")?.addEventListener("click", (e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: "smooth" }); });
 
-  // 스크롤 등장
-  const io = "IntersectionObserver" in window
-    ? new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }), { threshold: 0.12 })
-    : null;
-  $$(".reveal").forEach((el) => (io ? io.observe(el) : el.classList.add("in")));
+  // 히어로 제목: 글자 단위 등장 (처음 한 번)
+  if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    let n = 0;
+    $$("[data-split]").forEach((el) => {
+      const cs = [...el.textContent].map((ch) => { const s = document.createElement("span"); s.className = "split-c"; s.textContent = ch; s.style.animationDelay = 0.15 + n++ * 0.045 + "s"; return s; });
+      el.replaceChildren(...cs);
+    });
+  }
+
+  // 강점 줄에 올리거나 누르면 오른쪽 사진이 그 줄의 것으로 바뀐다
+  const peek = $("[data-peek]");
+  if (peek) {
+    const rows = $$("li", peek), shots = $$(".why-photo img");
+    const pick = (i) => { rows.forEach((r, k) => r.classList.toggle("on", k === i)); shots.forEach((im, k) => im.classList.toggle("on", k === i)); };
+    rows.forEach((r, i) => { r.addEventListener("mouseenter", () => pick(i)); r.addEventListener("click", () => pick(i)); });
+  }
 
   // 히어로 슬라이더
   const slides = $$(".slide");

@@ -1,2 +1,6 @@
 .DS_Store
 **/.DS_Store
+.taste-skill/
+# 생성 원본 (페이지는 jpg 를 쓴다)
+assets/images/why/*.png
+assets/images/hero/malatang-dark.*

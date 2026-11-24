@@ -22,7 +22,7 @@
 
   function card(p) {
     return `<article class="pcard">
-      <a href="${ROOT}pages/product-detail.html?id=${p.id}" class="im">${imgTag(p)}</a>
+      <a href="${ROOT}pages/products/${p.id}.html" class="im">${imgTag(p)}</a>
       <div class="bd"><h3>${esc(p.name)}</h3><small>${esc(meta(p))}</small></div>
       <button type="button" class="add ${cart.has(p.id) ? "on" : ""}" data-id="${p.id}">${cart.has(p.id) ? "✓ 견적 담김" : "+ 견적 담기"}</button>
     </article>`;
@@ -33,7 +33,7 @@
     const pool = products.filter((p) => p.image);
     const first = pool.filter((p) => p.categories.includes("마라탕"));
     const picks = [...first.slice(0, 7), ...pool.filter((p) => !first.slice(0, 7).includes(p)).filter((_, i) => i % 29 === 0).slice(0, 5)];
-    const html = picks.map((p) => `<a href="${ROOT}pages/product-detail.html?id=${p.id}"><img src="${ROOT}${p.image}" alt="${esc(p.name)}" loading="lazy"><p>${esc(p.name)}</p></a>`).join("");
+    const html = picks.map((p) => `<a href="${ROOT}pages/products/${p.id}.html"><img src="${ROOT}${p.image}" alt="${esc(p.name)}" loading="lazy"><p>${esc(p.name)}</p></a>`).join("");
     wrap.innerHTML = html + html; // 무한 롤링용 복제
   }
 
@@ -66,18 +66,20 @@
     render();
   }
 
+  // 예전 주소(product-detail.html?id=N)로 들어오면 제품별 고정 주소로 넘긴다
   function detail(products, wrap) {
     const id = new URLSearchParams(location.search).get("id");
-    const p = products.find((x) => String(x.id) === id) || products[0];
-    document.title = `${p.name} — 이레푸드서비스 주식회사`;
-    wrap.innerHTML = `<div class="im">${imgTag(p)}</div>
-      <div><h1>${esc(p.name)}</h1>
-        <div class="info-row"><strong>보관방법</strong><span>${esc(p.storage || "-")}</span></div>
-        <div class="info-row"><strong>원산지</strong><span>${esc(p.origin || "-")}</span></div>
-        <div class="info-row"><strong>카테고리</strong><span>${esc(p.categories.join(" · "))}</span></div>
-        <div class="btns"><button type="button" class="pill" data-add>${cart.has(p.id) ? "✓ 견적 담김" : "+ 견적 담기"}</button><a class="pill line" href="${ROOT}pages/customer.html#inquiry">견적 문의하러 가기</a></div>
-      </div>`;
-    wrap.querySelector("[data-add]").addEventListener("click", (e) => { cart.toggle(p); e.target.textContent = cart.has(p.id) ? "✓ 견적 담김" : "+ 견적 담기"; });
+    const p = products.find((x) => String(x.id) === id);
+    location.replace(p ? `${ROOT}pages/products/${p.id}.html` : `${ROOT}pages/product.html`);
+  }
+
+  // 제품별 고정 주소 페이지: 내용은 HTML 에 이미 있고, 견적 담기만 붙인다
+  function staticDetail(wrap) {
+    const p = { id: Number(wrap.dataset.id), name: wrap.dataset.name };
+    const btn = wrap.querySelector("[data-add]");
+    const label = () => { btn.textContent = cart.has(p.id) ? "✓ 견적 담김" : "+ 견적 담기"; };
+    btn.addEventListener("click", () => { cart.toggle(p); label(); });
+    label();
   }
 
   // 하단 견적 바
@@ -94,11 +96,13 @@
     const roll = document.querySelector("[data-rolling]");
     const grid = document.querySelector("[data-product-grid]");
     const det = document.querySelector("[data-product-detail]");
+    const st = document.querySelector("[data-static-product]");
+    if (st) { staticDetail(st); cartBar(); }
     if (!roll && !grid && !det) return;
     fetch(ROOT + "data/products.json").then((r) => { if (!r.ok) throw 0; return r.json(); }).then((products) => {
       if (roll) rolling(products, roll);
       if (grid) { list(products, grid, document.querySelector("[data-product-filter]"), document.querySelector("[data-product-search]"), document.querySelector("[data-more]")); cartBar(); grid.addEventListener("click", (e) => { const b = e.target.closest(".add"); if (b) cart.toggle(products.find((x) => x.id === Number(b.dataset.id))); }); }
-      if (det) { detail(products, det); cartBar(); }
+      if (det) detail(products, det);
     }).catch(() => { (roll || grid || det).innerHTML = "<p>제품 데이터를 불러오지 못했습니다. 로컬 서버(http://localhost)로 열어주세요.</p>"; });
   });
 })();

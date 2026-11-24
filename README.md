@@ -8,6 +8,7 @@
 - `build.py` 가 함께 만드는 파일: `sitemap.xml`, `robots.txt`, `llms.txt`(AI 검색용 회사 요약), 각 페이지의 canonical·구조화 데이터(JSON-LD)·FAQ. 업력(년수)·저작권 연도·품목 수는 빌드할 때 자동 계산되므로 **데이터를 바꾼 뒤엔 반드시 `python3 build.py`** 를 다시 실행
 - `legal/*.html` : 이용약관·개인정보처리방침·이메일무단수집거부 본문 (여기를 고치고 build)
 - 사업소개 FAQ 문답은 `build.py` 의 `FAQ` 목록에서 수정
+- `pages/products/<id>.html` : 제품마다 한 장씩 `build.py` 가 만든다 (손으로 고치지 않는다). 제품을 더하거나 빼면 빌드할 때 따라 생기고 지워진다
 - `data/products.json` (제품 459개), `data/notices.json` (공지) : 항목 추가로 운영
 - `assets/images/hero/` 히어로 사진, `assets/images/products/` 제품 사진(655개)
 
