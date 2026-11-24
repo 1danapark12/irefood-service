@@ -13,7 +13,7 @@ NAVER_VERIFY = "d1232523adb4906833ea39d5c0562d66070a8a9a"  # 네이버 서치어
 GOOGLE_VERIFY = "5jVOTsCNLuo-kjPYA45SDNmiX0FaXkE50mFVW6SGGp4"  # 구글 서치콘솔 소유확인
 # 방문 분석. 값을 비우면("") 그 태그는 들어가지 않는다.
 GOOGLE_TAG = "GTM-578KTM5N"  # 구글 애널리틱스(GA4)가 준 설치 태그. 속성 「irefood.com」, 측정 ID G-00BR4PVW5E
-NAVER_WA = ""  # 네이버 애널리틱스 사이트 ID (발급받으면 넣는다)
+NAVER_WA = "8ae106ef824838"  # 네이버 애널리틱스 발급 ID (사이트명 「이레푸드서비스」)
 
 
 def analytics():
@@ -27,11 +27,22 @@ def analytics():
   gtag('js', new Date());
 </script>
 """
-    if NAVER_WA:
-        out += f"""<script src="//wcs.naver.net/wcslog.js"></script>
-<script>if(!wcs_add) var wcs_add = {{}}; wcs_add["wa"] = "{NAVER_WA}"; if(window.wcs) {{ wcs_do(); }}</script>
-"""
     return out
+
+
+def analytics_body():
+    """</body> 바로 앞에 넣는 네이버 애널리틱스 스크립트 (네이버가 준 그대로)."""
+    if not NAVER_WA:
+        return ""
+    return f"""<script type="text/javascript" src="//wcs.pstatic.net/wcslog.js"></script>
+<script type="text/javascript">
+if(!wcs_add) var wcs_add = {{}};
+wcs_add["wa"] = "{NAVER_WA}";
+if(window.wcs) {{
+wcs_do();
+}}
+</script>
+"""
 
 TEL, TEL_RAW, MAIL = "010-4751-1668", "01047511668", "irefood@irefood.com"
 ADDR = "경기 구리시 갈매순환로166번길 46 금강펜테리움 IX타워 B2 8,9호 (우:11901)"
@@ -224,7 +235,7 @@ def footer(root, scripts):
   <a href="{SNS['스마트스토어']}" target="_blank" rel="noopener" class="store" aria-label="네이버 스마트스토어 (새 창)"><b>N</b><span class="t">스마트스토어</span></a>
 </div>
 <script src="{root}assets/js/main.js"></script>
-{scripts}</body>
+{scripts}{analytics_body()}</body>
 </html>
 """
 
