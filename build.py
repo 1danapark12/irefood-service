@@ -17,32 +17,41 @@ NAVER_WA = "8ae106ef824838"  # 네이버 애널리틱스 발급 ID (사이트명
 
 
 def analytics():
-    """<head> 맨 앞에 넣는 방문 분석 태그."""
-    out = ""
-    if GOOGLE_TAG:
-        out += f"""<script async src="https://www.googletagmanager.com/gtm.js?id={GOOGLE_TAG}"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){{dataLayer.push(arguments);}}
-  gtag('js', new Date());
+    """<head> 맨 앞에 넣는 구글 태그. irefood.com 에서 열렸을 때만 불러온다 (사본 주소·로컬 미리보기는 집계하지 않는다)."""
+    if not GOOGLE_TAG:
+        return ""
+    return f"""<script>
+  if (/(^|\\.)irefood\\.com$/.test(location.hostname)) {{
+    var gt = document.createElement('script');
+    gt.async = true;
+    gt.src = 'https://www.googletagmanager.com/gtm.js?id={GOOGLE_TAG}';
+    document.head.appendChild(gt);
+    window.dataLayer = window.dataLayer || [];
+    window.gtag = function(){{dataLayer.push(arguments);}};
+    gtag('js', new Date());
+  }}
 </script>
 """
-    return out
 
 
 def analytics_body():
-    """</body> 바로 앞에 넣는 네이버 애널리틱스 스크립트 (네이버가 준 그대로)."""
+    """</body> 바로 앞에 넣는 네이버 애널리틱스 스크립트. irefood.com 에서 열렸을 때만 불러온다."""
     if not NAVER_WA:
         return ""
-    return f"""<script type="text/javascript" src="//wcs.pstatic.net/wcslog.js"></script>
-<script type="text/javascript">
-if(!wcs_add) var wcs_add = {{}};
-wcs_add["wa"] = "{NAVER_WA}";
-if(window.wcs) {{
-wcs_do();
-}}
+    return f"""<script>
+  if (/(^|\\.)irefood\\.com$/.test(location.hostname)) {{
+    var nw = document.createElement('script');
+    nw.src = 'https://wcs.pstatic.net/wcslog.js';
+    nw.onload = function () {{
+      if (!window.wcs_add) window.wcs_add = {{}};
+      wcs_add["wa"] = "{NAVER_WA}";
+      if (window.wcs) wcs_do();
+    }};
+    document.body.appendChild(nw);
+  }}
 </script>
 """
+
 
 TEL, TEL_RAW, MAIL = "010-4751-1668", "01047511668", "irefood@irefood.com"
 ADDR = "경기 구리시 갈매순환로166번길 46 금강펜테리움 IX타워 B2 8,9호 (우:11901)"
