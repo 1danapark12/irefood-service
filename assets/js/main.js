@@ -53,6 +53,19 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // 방문 분석: 전화·견적 문의·스마트스토어 클릭을 이벤트로 남긴다 (태그가 없으면 아무 일도 하지 않는다)
+  const track = (name, params) => { if (typeof window.gtag === "function") window.gtag("event", name, params || {}); };
+  window.IRE_TRACK = track;
+  document.addEventListener("click", (e) => {
+    const a = e.target.closest("a[href]");
+    if (!a) return;
+    const href = a.getAttribute("href");
+    const where = a.closest(".sec01") ? "hero" : a.closest("header, .all-menu") ? "header" : a.closest(".float-call") ? "float" : a.closest("footer") ? "footer" : "body";
+    if (href.startsWith("tel:")) track("phone_click", { link_location: where });
+    else if (/customer\.html#inquiry/.test(href)) track("quote_click", { link_location: where });
+    else if (/smartstore\.naver\.com/.test(href)) track("smartstore_click", { link_location: where });
+  });
+
   // 강점 줄에 올리거나 누르면 오른쪽 사진이 그 줄의 것으로 바뀐다
   const peek = $("[data-peek]");
   if (peek) {

@@ -12,6 +12,7 @@
       const c = this.get();
       const i = c.findIndex((x) => x.id === p.id);
       i >= 0 ? c.splice(i, 1) : c.push({ id: p.id, name: p.name });
+      if (i < 0 && window.IRE_TRACK) window.IRE_TRACK("add_to_quote", { item_id: String(p.id), item_name: p.name });
       this.set(c);
     },
   };

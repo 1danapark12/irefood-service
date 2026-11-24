@@ -11,6 +11,27 @@ FOUNDED = 1998
 YEARS = TODAY.year - FOUNDED  # 업력: 빌드할 때마다 자동 계산 (숫자를 직접 쓰지 말 것)
 NAVER_VERIFY = "d1232523adb4906833ea39d5c0562d66070a8a9a"  # 네이버 서치어드바이저 소유확인
 GOOGLE_VERIFY = "5jVOTsCNLuo-kjPYA45SDNmiX0FaXkE50mFVW6SGGp4"  # 구글 서치콘솔 소유확인
+# 방문 분석. 값을 비우면("") 그 태그는 들어가지 않는다.
+GOOGLE_TAG = "GTM-578KTM5N"  # 구글 애널리틱스(GA4)가 준 설치 태그. 속성 「irefood.com」, 측정 ID G-00BR4PVW5E
+NAVER_WA = ""  # 네이버 애널리틱스 사이트 ID (발급받으면 넣는다)
+
+
+def analytics():
+    """<head> 맨 앞에 넣는 방문 분석 태그."""
+    out = ""
+    if GOOGLE_TAG:
+        out += f"""<script async src="https://www.googletagmanager.com/gtm.js?id={GOOGLE_TAG}"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){{dataLayer.push(arguments);}}
+  gtag('js', new Date());
+</script>
+"""
+    if NAVER_WA:
+        out += f"""<script src="//wcs.naver.net/wcslog.js"></script>
+<script>if(!wcs_add) var wcs_add = {{}}; wcs_add["wa"] = "{NAVER_WA}"; if(window.wcs) {{ wcs_do(); }}</script>
+"""
+    return out
 
 TEL, TEL_RAW, MAIL = "010-4751-1668", "01047511668", "irefood@irefood.com"
 ADDR = "경기 구리시 갈매순환로166번길 46 금강펜테리움 IX타워 B2 8,9호 (우:11901)"
@@ -122,7 +143,7 @@ def head(title, desc, root, path=None, extra=""):
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+{analytics()}<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{title}</title>
 <meta name="description" content="{desc}">
 <meta name="keywords" content="{", ".join(KEYWORDS)}">

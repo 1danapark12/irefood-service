@@ -49,6 +49,7 @@ document.addEventListener("DOMContentLoaded", () => {
       try { localStorage.removeItem("irefood_quote"); } catch (er) {}
       renderBox();
       status.textContent = "문의가 접수되었습니다. 확인 후 빠르게 연락드리겠습니다.";
+      if (window.IRE_TRACK) window.IRE_TRACK("generate_lead", { quote_items: c.length });
     } catch (er) { status.textContent = "전송에 실패했습니다. 전화(010-4751-1668)로 문의해주세요."; btn.disabled = false; }
   });
 });
