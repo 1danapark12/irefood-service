@@ -17,3 +17,8 @@
 2. 카카오맵: Kakao Developers > 플랫폼 > Web 에 배포 도메인 등록
 3. 약관 3종(`legal/`)은 게시 전 검토 — 개인정보 보호책임자: 박한나 (변경 시 legal/privacy.html 수정)
 4. 배포 후 네이버 서치어드바이저·구글 서치콘솔에 `https://www.irefood.com/sitemap.xml` 제출
+
+## 배포
+- 실제 사이트는 GitHub Pages 로 나간다 (`main` 에 올리면 반영, 주소는 `CNAME` 의 www.irefood.com).
+- `vercel.json` 은 Vercel 이 이 저장소를 자동으로 따라 배포하지 않게 막아 둔 것이다. 사본 주소(…vercel.app)가 새로 생기지 않는다.
+- 방문 분석 태그(구글 애널리틱스, 네이버 애널리틱스)는 `build.py` 의 `GOOGLE_TAG`, `NAVER_WA` 에 있고, irefood.com 에서 열렸을 때만 동작한다.
